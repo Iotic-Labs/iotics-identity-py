@@ -7,8 +7,29 @@ ubjson/*.html
 *.py[cod]
 *.so
 .coverage
+coverage.xml
 coverage
-MANIFEST
+
 *.egg
 .eggs/
-py_ubjson.egg-info/
+*.egg-info
+
+env
+venv
+.env
+.venv
+
+# mypy
+.mypy_cache/
+
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+test-bdd-results.xml
+test-lib-results.xml
+test-unit-results.xml
