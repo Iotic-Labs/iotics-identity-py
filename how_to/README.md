@@ -63,7 +63,7 @@ See scripts: [How to use the high level identity API](./high_level_api.py)
 Run it and have a look at the output
 ```bash
 export RESOLVER='http://localhost:5000'
-VERSION=dev pip install .
+pip install iotics-identity
 python ./high_level_api.py
 ```
 
@@ -94,7 +94,7 @@ See scripts: [How to use the identity API](./regular_api.py)
 Run it and have a look at the output
 ```bash
 export RESOLVER='http://localhost:5000'
-VERSION=dev pip install .
+pip install iotics-identity
 python ./regular_api.py
 ```
 

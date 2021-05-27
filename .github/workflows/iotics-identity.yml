@@ -1,0 +1,130 @@
+# Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0.
+name: Iotics Identity
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types:
+      - created
+
+jobs:
+  validate:
+    name: Validate library on "${{ matrix.os }}" with python:${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip tox
+      - name: Lint with flake8/pylint/mypy
+        run: |
+          tox -e lint
+      - name: Test with pytest
+        run: |
+          tox -e pytest
+      - name: Test with pytest BDD
+        run: |
+          tox -e pytestbdd
+  package:
+    name: Package the library
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel==0.36.2
+      - name: Package
+        run: |
+          python3 setup.py -q clean -a
+          python3 setup.py sdist bdist_wheel
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: pkgs
+          path: dist/
+
+  check-pkgs:
+    name: Validate the packages on "${{ matrix.os }}" with python:${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    needs: package
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+      - uses: actions/download-artifact@master
+        with:
+          name: pkgs
+          path: .
+      - name: Check source package
+        run: |
+          pip install iotics-identity-*.tar.gz
+          python -c 'import iotics.lib.identity'
+          pip uninstall -y iotics-identity
+        shell: bash
+      - name: Check wheel package
+        run: |
+          pip install iotics_identity-*.whl
+          python -c 'import iotics.lib.identity'
+          pip uninstall -y iotics-identity
+        shell: bash
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: check-pkgs
+    steps:
+      - uses: actions/download-artifact@master
+        with:
+          name: pkgs
+          path: ./dist
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: Publish package to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_PASSWORD }}
+          repository_url: https://test.pypi.org/legacy/
+          packages_dir: ./dist/
+          verify_metadata: true
+          verbose: true
+          skip_existing: true
+
+      - name: Publish package to PyPi
+        if: github.event_name == 'release' && github.event.action == 'created'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_PASSWORD }}
+          packages_dir: ./dist/
+          verify_metadata: true
+          verbose: true
+          skip_existing: false
