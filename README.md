@@ -21,19 +21,19 @@ Two examples are provided to illustrate the usage of the **high level API** and 
 See [Iotics Identity API How To](./how_to/README.md).
 
 * Setup your dev environment: \
-  `VERSION=dev pip install .[test,lint]`
+  `pip install .[dev]`
 
 * Run the linter: \
-  `VERSION=dev tox -e lint`
+  `tox -e lint`
 
 * Run type analysis: \
-  `VERSION=dev tox -e mypy`
+  `tox -e mypy`
 
 * Run unit tests: \
-  `VERSION=dev tox -e pytest`
+  `tox -e pytest`
 
 * Run BDD tests: \
-  `VERSION=dev tox -e pytestbdd`
+  `tox -e pytestbdd`
 
 ## Technology Used
 
