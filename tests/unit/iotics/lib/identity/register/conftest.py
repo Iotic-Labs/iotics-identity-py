@@ -35,6 +35,11 @@ def a_controller():
 
 
 @pytest.fixture
+def b_controller():
+    return Issuer('did:iotics:iotHjrmKpPGWyEC4FFo4d6oyzVVk6MXXXXXX', '#AController')
+
+
+@pytest.fixture
 def a_proof():
     return 'a_proof_validated_by_the_resolver'
 

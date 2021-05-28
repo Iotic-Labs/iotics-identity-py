@@ -134,6 +134,25 @@ def test_can_build_a_register_doc_from_dict(minimal_doc, full_doc, is_minimal):
     assert new_doc.auth_delegation_proof == doc.auth_delegation_proof
 
 
+def test_can_build_a_register_doc_from_minimal_dict(minimal_doc):
+    doc_as_dict = minimal_doc.to_dict()
+    doc_as_dict.pop('authentication')
+    doc_as_dict.pop('delegateControl')
+    doc_as_dict.pop('delegateAuthentication')
+
+    new_doc = RegisterDocumentBuilder().build_from_dict(doc_as_dict)
+    assert new_doc.did == minimal_doc.did
+    assert new_doc.purpose == minimal_doc.purpose
+    assert new_doc.proof == minimal_doc.proof
+    assert new_doc.revoked == minimal_doc.revoked
+    assert new_doc.spec_version == minimal_doc.spec_version
+    assert new_doc.metadata == minimal_doc.metadata
+    assert new_doc.public_keys == minimal_doc.public_keys
+    assert not new_doc.auth_keys
+    assert not new_doc.control_delegation_proof
+    assert not new_doc.auth_delegation_proof
+
+
 @pytest.mark.parametrize('is_minimal', (True, False))
 def test_can_build_a_register_doc_from_an_other_doc(minimal_doc, full_doc, is_minimal):
     doc = minimal_doc if is_minimal else full_doc
@@ -258,11 +277,39 @@ def test_can_remove_not_existing_key_without_error(doc_did, doc_proof, doc_keys,
     assert existing_doc_key_set == new_doc_key_set
 
 
-def test_building_a_register_doc_raises_a_conflict_error_if_not_unique_key_names(doc_keys):
+def test_building_a_register_doc_does_not_raises_if_same_key_is_added_twice(doc_keys):
+    RegisterDocumentBuilder() \
+        .add_public_key_obj(doc_keys['#pub_key1']) \
+        .add_public_key_obj(doc_keys['#pub_key1'])
+
+
+def test_building_a_register_doc_raises_if_same_key_is_added_twice(doc_keys):
+    duplicate_pub_key1 = RegisterPublicKey(name=doc_keys['#pub_key1'].name,
+                                           base58=get_public_base_58_key(),
+                                           revoked=doc_keys['#pub_key1'].revoked)
     with pytest.raises(IdentityRegisterDocumentKeyConflictError):
         RegisterDocumentBuilder() \
             .add_public_key_obj(doc_keys['#pub_key1']) \
-            .add_public_key_obj(doc_keys['#pub_key1'])
+            .add_public_key_obj(duplicate_pub_key1)
+
+
+def test_building_a_register_doc_does_not_raises_if_same_delegation_is_added_twice(doc_keys):
+    RegisterDocumentBuilder() \
+        .add_control_delegation_obj(doc_keys['#deleg_control_key1']) \
+        .add_control_delegation_obj(doc_keys['#deleg_control_key1'])
+
+
+def test_building_a_register_doc_raises_if_same_delegation_is_added_twice(doc_keys):
+    duplicate_deleg_control_key1 = RegisterDelegationProof(name=doc_keys['#deleg_control_key1'].name,
+                                                           controller=Issuer(
+                                                               'did:iotics:iotHjrmKpPGWyEC4FFo4d6oyzVVk6MXFFFFF',
+                                                               '#AController'),
+                                                           proof=doc_keys['#deleg_control_key1'].proof,
+                                                           revoked=doc_keys['#deleg_control_key1'].revoked)
+    with pytest.raises(IdentityRegisterDocumentKeyConflictError):
+        RegisterDocumentBuilder() \
+            .add_control_delegation_obj(doc_keys['#deleg_control_key1']) \
+            .add_control_delegation_obj(duplicate_deleg_control_key1)
 
 
 def test_building_a_register_doc_raises_a_validation_error_if_invalid_key(doc_keys):

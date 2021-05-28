@@ -9,7 +9,8 @@ from iotics.lib.identity.api.advanced_api import AdvancedIdentityLocalApi, Advan
 from iotics.lib.identity.crypto.identity import make_identifier
 from iotics.lib.identity.crypto.issuer import Issuer
 from iotics.lib.identity.crypto.key_pair_secrets import DIDType
-from iotics.lib.identity.error import IdentityRegisterIssuerNotFoundError, IdentityResolverError
+from iotics.lib.identity.error import IdentityRegisterIssuerNotFoundError, IdentityResolverError, \
+    IdentityDependencyError
 from iotics.lib.identity.register.document import RegisterDocument
 from iotics.lib.identity.register.keys import RegisterDelegationProof, RegisterPublicKey
 from tests.unit.iotics.lib.identity.fake import ResolverClientTest
@@ -40,6 +41,18 @@ def other_doc_did(other_key_pair):
 @pytest.fixture
 def other_doc_issuer(other_doc_did):
     return Issuer.build(other_doc_did, '#DelegatedDoc')
+
+
+def test_get_key_pair_from_hex_private_key():
+    private_expo = 'a' * 32
+    expected_base58 = 'Na5aHX3iZsWWbmde1HXwKHSZd1YxYJk73gQHd216N8ANXK3uHNcVgq14mRPdScNuxhVNQ4gGuVwHGpTMcQm9qF5w'
+    keypair = AdvancedIdentityLocalApi.get_key_pair_from_hex_private_key(private_expo)
+    assert keypair.public_base58 == expected_base58
+
+
+def test_get_key_pair_from_hex_private_key_error():
+    with pytest.raises(IdentityDependencyError):
+        AdvancedIdentityLocalApi.get_key_pair_from_hex_private_key('')
 
 
 def test_get_issuer_by_public_key_raises_not_found_error_if_not_found(base_doc, other_key_pair):

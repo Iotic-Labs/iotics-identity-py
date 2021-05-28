@@ -1,6 +1,7 @@
 # Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0.
 
 import hmac
+from _sha256 import sha256
 from _sha512 import sha512
 
 import base58
@@ -14,8 +15,9 @@ from iotics.lib.identity.error import IdentityValidationError
 
 
 @pytest.fixture
-def master(valid_seed_16_bytes):
-    return hmac.new(valid_seed_16_bytes, b'passwdPlop', sha512).digest()
+def private_expo(valid_seed_16_bytes):
+    master = hmac.new(valid_seed_16_bytes, b'passwdPlop', sha512).digest()
+    return hmac.new(master, b'plopPLOPplop', sha256).hexdigest()
 
 
 @pytest.fixture
@@ -28,8 +30,8 @@ def key_pair(valid_key_pair_secrets):
     return KeyPairSecretsHelper.get_key_pair(valid_key_pair_secrets)
 
 
-def test_get_private_ecdsa(master):
-    private_ecdsa = KeysHelper.get_private_ECDSA(master, key_path=b'plopPLOPplop')
+def test_get_private_ecdsa(private_expo):
+    private_ecdsa = KeysHelper.get_private_ECDSA(private_expo)
     assert private_ecdsa
     assert private_ecdsa.key_size == ec.SECP256K1().key_size
     assert private_ecdsa.curve.name == ec.SECP256K1().name

@@ -18,6 +18,10 @@ class RegisterKeyBase(ABC):
     def get_new_key(self, revoked: bool) -> 'RegisterKeyBase':
         raise NotImplementedError
 
+    @abstractmethod
+    def is_equal(self, other: 'RegisterKeyBase') -> bool:
+        raise NotImplementedError
+
 
 @dataclass(frozen=True)  # type: ignore
 class RegisterKey(RegisterKeyBase, ABC):
@@ -27,6 +31,16 @@ class RegisterKey(RegisterKeyBase, ABC):
     @abstractmethod
     def get_new_key(self, revoked: bool) -> 'RegisterKeyBase':
         raise NotImplementedError
+
+    def is_equal(self, other: 'RegisterKey') -> bool:  # type: ignore
+        """
+        Check if register key is equal by name, public key base58 and revoked
+        This is not overriding the default __eq__ because we still need to fully compare the objects
+
+        :param other: Other register key to compare
+        :return: True if equal
+        """
+        return self.name == other.name and self.base58 == other.base58 and self.revoked == other.revoked
 
 
 @dataclass(frozen=True)
@@ -146,6 +160,17 @@ class RegisterDelegationProof(RegisterKeyBase):
     controller: Issuer
     proof: str
     revoked: bool
+
+    def is_equal(self, other: 'RegisterDelegationProof') -> bool:  # type: ignore
+        """
+        Check if register delegation proof is equal by name, controller and revoked
+        Cannot check proof as this changes every time
+        This is not overriding the default __eq__ because we still need to fully compare the objects
+
+        :param other: Other register delegation proof to compare
+        :return: True if equal
+        """
+        return self.name == other.name and self.controller == other.controller and self.revoked == other.revoked
 
     def to_dict(self):
         return {'id': self.name,
