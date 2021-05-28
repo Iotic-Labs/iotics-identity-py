@@ -1,5 +1,10 @@
 # iotics-identity-py
 
+[![PyPi version](https://pypip.in/v/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity/)
+[![PyPi downloads](https://pypip.in/d/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity/#files)
+[![PyPi wheel](https://pypip.in/wheel/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity/#files)
+[![PyPi license](https://pypip.in/license/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity)
+
 This is a Python v3.8+ library for Decentralised Identity (DID) management with Iotics.
 
 ## License
