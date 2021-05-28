@@ -1,0 +1,22 @@
+# Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0.
+name: Iotics Identity Tag release
+
+on: repository_dispatch
+
+jobs:
+  tag:
+    name: tag repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: tag
+        run: |
+          pip insatll .
+          TAG=$(python -c 'from importlib.metadata import version; print(version("iotics-identity"))')
+          echo "git tag $TAG"
+
