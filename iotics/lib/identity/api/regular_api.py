@@ -293,7 +293,8 @@ class IdentityApi:
             IdentityValidationError: if invalid token data
             IdentityDependencyError: if incompatible library dependency
         """
-        return AdvancedIdentityLocalApi.create_agent_auth_token(agent_registered_identity.key_pair_secrets,
+        agent_key_pair = KeyPairSecretsHelper.get_key_pair(agent_registered_identity.key_pair_secrets)
+        return AdvancedIdentityLocalApi.create_agent_auth_token(agent_key_pair,
                                                                 agent_registered_identity.issuer,
                                                                 user_did,
                                                                 duration,

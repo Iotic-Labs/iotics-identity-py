@@ -9,7 +9,7 @@ from iotics.lib.identity.crypto.identity import make_identifier
 from iotics.lib.identity.crypto.issuer import Issuer, IssuerKey
 from iotics.lib.identity.crypto.jwt import JwtTokenHelper
 from iotics.lib.identity.crypto.key_pair_secrets import DIDType, KeyPairSecrets, KeyPairSecretsHelper
-from iotics.lib.identity.crypto.keys import KeyPair
+from iotics.lib.identity.crypto.keys import KeyPair, KeysHelper
 from iotics.lib.identity.crypto.proof import Proof
 from iotics.lib.identity.error import IdentityRegisterIssuerNotFoundError, IdentityResolverConflictError, \
     IdentityResolverDocNotFoundError, IdentityValidationError
@@ -24,6 +24,22 @@ from iotics.lib.identity.validation.document import DocumentValidation
 
 
 class AdvancedIdentityLocalApi:
+    @staticmethod
+    def get_key_pair_from_hex_private_key(private_expo_hex: str) -> KeyPair:
+        """
+        Get keypair given the private exponent as a hex string
+        :param private_expo_hex: private exponent as hex string
+        :return: KeyPair instance
+
+        :raises:
+            IdentityDependencyError: if incompatible EllipticCurve dependency
+        """
+        private_key = KeysHelper.get_private_ECDSA(private_expo_hex)
+        public_bytes, public_base58 = KeysHelper.get_public_keys_from_private_ECDSA(private_key)
+        return KeyPair(private_key=private_key,
+                       public_bytes=public_bytes,
+                       public_base58=public_base58)
+
     @staticmethod
     def get_issuer_by_public_key(doc: RegisterDocument, public_base58: str) -> Issuer:
         """
@@ -41,11 +57,11 @@ class AdvancedIdentityLocalApi:
         return issuer
 
     @staticmethod
-    def create_agent_auth_token(agent_secrets: KeyPairSecrets, agent_issuer: Issuer, user_did: str, duration: int,
+    def create_agent_auth_token(agent_key_pair: KeyPair, agent_issuer: Issuer, user_did: str, duration: int,
                                 audience: str, start_offset: int = DEFAULT_TOKEN_START_OFFSET_SECONDS):
         """
         Create an agent authentication token.
-        :param agent_secrets: agent secrets
+        :param agent_key_pair: agent key pair
         :param agent_issuer: agent issuer
         :param user_did: user register document decentralised identifier
         :param duration: token duration in seconds
@@ -58,20 +74,19 @@ class AdvancedIdentityLocalApi:
             IdentityValidationError: if invalid token data
             IdentityDependencyError: if incompatible library dependency
         """
-        private_key = KeyPairSecretsHelper.get_private_key(agent_secrets)
         return JwtTokenHelper.create_auth_token(str(agent_issuer),
                                                 user_did,
                                                 audience,
                                                 duration,
-                                                private_key,
+                                                agent_key_pair.private_key,
                                                 start_offset)
 
     @staticmethod
-    def create_twin_token(twin_secrets: KeyPairSecrets, twin_issuer: Issuer, duration: int,
+    def create_twin_token(twin_key_pair: KeyPair, twin_issuer: Issuer, duration: int,
                           audience: str, start_offset: int = DEFAULT_TOKEN_START_OFFSET_SECONDS):
         """
         Create a twin authentication token.
-        :param twin_secrets: twin secrets
+        :param twin_key_pair: twin key pair
         :param twin_issuer: twin issuer
         :param duration: token duration in seconds
         :param audience: Optional token audience
@@ -83,12 +98,11 @@ class AdvancedIdentityLocalApi:
             IdentityValidationError: if invalid token data
             IdentityDependencyError: if incompatible library dependency
         """
-        private_key = KeyPairSecretsHelper.get_private_key(twin_secrets)
         return JwtTokenHelper.create_auth_token(str(twin_issuer),
                                                 twin_issuer.did,
                                                 audience,  # type: ignore
                                                 duration,
-                                                private_key,
+                                                twin_key_pair.private_key,
                                                 start_offset)
 
     @staticmethod

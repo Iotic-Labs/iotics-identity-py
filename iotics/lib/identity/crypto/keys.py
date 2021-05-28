@@ -1,8 +1,6 @@
 # Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0.
 
-import hmac
 from dataclasses import dataclass
-from hashlib import sha256
 from typing import Tuple
 
 import base58
@@ -23,18 +21,15 @@ class KeyPair:
 class KeysHelper:
 
     @staticmethod
-    def get_private_ECDSA(master: bytes, key_path: bytes) -> ec.EllipticCurvePrivateKey:
+    def get_private_ECDSA(private_expo: str) -> ec.EllipticCurvePrivateKey:
         """
         Get private key (ECDSA) from master and purpose
-        :param master: master bytes used to generate the private key (starting key for the hash)
-        :param key_path: key path
+        :param private_expo: private exponent as hex string
         :return: private ECDSA key
 
         :raises:
             IdentityDependencyError: if incompatible EllipticCurve dependency
         """
-        private_expo = hmac.new(master, key_path, sha256).hexdigest()
-
         sbin = bytes.fromhex(private_expo)
         sint = int.from_bytes(sbin, 'big', signed=False)
 

@@ -27,8 +27,9 @@ class RegisterDocumentBuilder:
         self.revoked: bool = False
 
     def _check_and_update_map(self, name: str, val: object, key_map: dict, message_prefix: str):
-        if name in self.name_set:
+        if name in self.name_set and not val.is_equal(key_map.get(name)):  # type: ignore
             raise IdentityRegisterDocumentKeyConflictError(f'{message_prefix} \'{name}\' already in use')
+
         self.name_set.add(name)
         key_map[name] = val
 
@@ -242,11 +243,11 @@ class RegisterDocumentBuilder:
         try:
             for k in data['publicKey']:
                 self.add_public_key_obj(RegisterPublicKey.from_dict(k))
-            for k in data['authentication']:
+            for k in data.get('authentication', []):
                 self.add_authentication_key_obj(RegisterAuthenticationPublicKey.from_dict(k))
-            for k in data['delegateAuthentication']:
+            for k in data.get('delegateAuthentication', []):
                 self.add_authentication_delegation_obj(RegisterDelegationProof.from_dict(k))
-            for k in data['delegateControl']:
+            for k in data.get('delegateControl', []):
                 self.add_control_delegation_obj(RegisterDelegationProof.from_dict(k))
             raw_controller = data.get('controller')
             controller = Issuer.from_string(raw_controller) if raw_controller else None

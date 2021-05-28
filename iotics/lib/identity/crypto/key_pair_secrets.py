@@ -3,7 +3,7 @@
 import hmac
 from dataclasses import dataclass
 from enum import Enum, unique
-from hashlib import sha512
+from hashlib import sha256, sha512
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from mnemonic import Mnemonic  # type: ignore
@@ -195,7 +195,8 @@ class KeyPairSecretsHelper:
             raise IdentityValidationError(f'Invalid seed method \'{key_pair_secrets.seed_method}\', '
                                           f'must be in {[m.name for m in SeedMethod]}')
 
-        return KeysHelper.get_private_ECDSA(result, key_pair_secrets.path.encode())
+        private_expo = hmac.new(result, key_pair_secrets.path.encode(), sha256).hexdigest()
+        return KeysHelper.get_private_ECDSA(private_expo)
 
     @staticmethod
     def get_public_key_base58_from_key_pair_secrets(key_pair_secrets: KeyPairSecrets) -> str:
