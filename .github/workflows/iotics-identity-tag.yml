@@ -1,0 +1,22 @@
+# Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0.
+name: Iotics Identity Tag Repo (Manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tag-repo:
+    name: Tag Iotics Identity Git Repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Tag the git repo
+        run: |
+          pip install .
+          TAG=$(python -c 'from importlib.metadata import version; print(version("iotics-identity"))')
+          git tag $TAG
+          git push origin $TAG
