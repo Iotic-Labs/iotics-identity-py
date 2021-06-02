@@ -1,5 +1,6 @@
 # Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0.
 
+from iotics.lib.identity.const import ISSUER_SEPARATOR
 from typing import Dict
 
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -15,7 +16,7 @@ class ResolverClientTest(ResolverClient):
         self.docs = docs or {}
 
     def get_document(self, doc_id: str) -> RegisterDocument:
-        doc = self.docs.get(doc_id.split('#')[0])
+        doc = self.docs.get(doc_id.split(ISSUER_SEPARATOR)[0])
         if not doc:
             raise IdentityResolverDocNotFoundError(doc_id)
         return doc

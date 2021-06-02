@@ -41,8 +41,8 @@ class Issuer:
         parts = issuer_string.split(ISSUER_SEPARATOR)
         if len(parts) != 2:
             raise IdentityValidationError(
-                f'Invalid issuer string {issuer_string} should be of the form of [did]#[name]')
-        return Issuer.build(parts[0], f'#{parts[1]}')
+                f'Invalid issuer string {issuer_string} should be of the form of [did]{ISSUER_SEPARATOR}[name]')
+        return Issuer.build(parts[0], f'{ISSUER_SEPARATOR}{parts[1]}')
 
     def __str__(self) -> str:
         return f'{self.did}{self.name}'

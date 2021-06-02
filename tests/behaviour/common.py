@@ -1,3 +1,4 @@
+from iotics.lib.identity.const import ISSUER_SEPARATOR
 from typing import Dict, Optional
 
 import pytest
@@ -21,7 +22,7 @@ class RESTRequesterTest(RESTResolverRequester):
         self.doc_tokens = doc_tokens or {}
 
     def get_token(self, doc_id: str) -> str:
-        token = self.doc_tokens.get(doc_id.split('#')[0])
+        token = self.doc_tokens.get(doc_id.split(ISSUER_SEPARATOR)[0])
         if not token:
             raise IdentityResolverHttpDocNotFoundError(doc_id)
         return token

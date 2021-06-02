@@ -2,6 +2,7 @@
 import secrets
 from typing import Callable, Optional, Tuple
 
+from iotics.lib.identity.const import ISSUER_SEPARATOR
 from iotics.lib.identity.api.advanced_api_keys import RegisterAuthDelegPublicDocKeysApi, RegisterAuthPublicDocKeysApi, \
     RegisterCtrlDelegPublicDocKeysApi, RegisterPublicDocKeysApi
 from iotics.lib.identity.const import DEFAULT_TOKEN_START_OFFSET_SECONDS
@@ -304,7 +305,7 @@ class AdvancedIdentityRegisterApi:
         """
         key_pair = KeyPairSecretsHelper.get_key_pair(key_pair_secrets)
         did = AdvancedIdentityLocalApi.create_identifier(key_pair.public_bytes)
-        name = name or f'#{purpose}-0'
+        name = name or f'{ISSUER_SEPARATOR}{purpose}-0'
         issuer = Issuer.build(did, name)
         if override_doc:
             self.register_new_doc(key_pair_secrets, issuer, purpose)
