@@ -7,18 +7,14 @@ from iotics.lib.identity.crypto.key_pair_secrets import KeyPairSecrets, KeyPairS
 from iotics.lib.identity.error import IdentityValidationError
 
 
-def test_can_convert_seed_to_mnemonic(valid_bip39_seed):
+def test_can_convert_seed_to_mnemonic(valid_bip39_seed, valid_bip39_mnemonic_english):
     mnemonic = KeyPairSecretsHelper.seed_bip39_to_mnemonic(valid_bip39_seed)
-    assert mnemonic == ('goddess muscle soft human fatal country this hockey great perfect evidence '
-                        'gather industry rack silver small cousin another flee silver casino country '
-                        'sugar purse')
+    assert mnemonic == valid_bip39_mnemonic_english
 
 
-def test_can_convert_seed_to_mnemonic_with_spanish(valid_bip39_seed):
+def test_can_convert_seed_to_mnemonic_with_spanish(valid_bip39_seed, valid_bip39_mnemonic_spanish):
     mnemonic = KeyPairSecretsHelper.seed_bip39_to_mnemonic(valid_bip39_seed, lang='spanish')
-    assert mnemonic == ('glaciar mojar rueda hueso exponer chupar tanque hijo grano olvido ensayo '
-                        'gaita inmune percha retrato rojo cielo alivio fiel retrato brusco chupar '
-                        'sirena peine')
+    assert mnemonic == valid_bip39_mnemonic_spanish
 
 
 @pytest.mark.parametrize('invalid_seed,error_val', (('a' * 16, 'Invalid seed format'),
@@ -35,6 +31,30 @@ def test_convert_seed_to_mnemonic_raises_validation_error_if_invalid_language(va
     with pytest.raises(IdentityValidationError) as err_wrp:
         KeyPairSecretsHelper.seed_bip39_to_mnemonic(valid_bip39_seed, lang='invalid_lang')
     assert 'Invalid language for mnemonic:' in str(err_wrp.value)
+    assert isinstance(err_wrp.value.__cause__, FileNotFoundError)
+
+
+def test_can_convert_mnemonic_to_seed(valid_bip39_mnemonic_english, valid_bip39_seed):
+    seed = KeyPairSecretsHelper.mnemonic_bip39_to_seed(valid_bip39_mnemonic_english, lang='english')
+    assert seed == valid_bip39_seed
+
+
+def test_can_convert_mnemonic_to_seed_with_spanish(valid_bip39_mnemonic_spanish, valid_bip39_seed):
+    seed = KeyPairSecretsHelper.mnemonic_bip39_to_seed(valid_bip39_mnemonic_spanish, lang='spanish')
+    assert seed == valid_bip39_seed
+
+
+@pytest.mark.parametrize('invalid_mnemonic', ('flee' * 10,
+                                              'flee' * 32))
+def test_convert_mnemonic_to_seed_raises_validation_error_if_invalid_seed(invalid_mnemonic):
+    with pytest.raises(IdentityValidationError):
+        KeyPairSecretsHelper.mnemonic_bip39_to_seed(invalid_mnemonic)
+
+
+def test_convert_mnemonic_to_seed_raises_validation_error_if_invalid_language(valid_bip39_mnemonic_english):
+    with pytest.raises(IdentityValidationError) as err_wrp:
+        KeyPairSecretsHelper.mnemonic_bip39_to_seed(valid_bip39_mnemonic_english, lang='invalid_lang')
+    assert isinstance(err_wrp.value.__cause__, FileNotFoundError)
 
 
 def test_validate_bip39_seed_should_not_raise_if_valid_seed(valid_bip39_seed):

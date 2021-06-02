@@ -14,6 +14,20 @@ def valid_bip39_seed():
 
 
 @pytest.fixture
+def valid_bip39_mnemonic_english():
+    # Note: This matches the d239...6b65 bip39_seed from above
+    return 'goddess muscle soft human fatal country this hockey great perfect evidence gather industry rack silver ' + \
+           'small cousin another flee silver casino country sugar purse'
+
+
+@pytest.fixture
+def valid_bip39_mnemonic_spanish():
+    # Note: This matches the d239...6b65 bip39_seed from above
+    return 'glaciar mojar rueda hueso exponer chupar tanque hijo grano olvido ensayo gaita inmune percha retrato ' + \
+           'rojo cielo alivio fiel retrato brusco chupar sirena peine'
+
+
+@pytest.fixture
 def valid_key_pair_secrets(valid_bip39_seed):
     return KeyPairSecrets.build(valid_bip39_seed, 'iotics/0/something/user')
 

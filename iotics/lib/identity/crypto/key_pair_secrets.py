@@ -130,9 +130,26 @@ class KeyPairSecretsHelper:
 
     @staticmethod
     def mnemonic_bip39_to_seed(mnemonic: str, lang: str = 'english') -> bytes:
-        """mnemonic_bip39_to_seed: Take mnemonic string and return seed string hex"""
-        men = Mnemonic(lang)
-        return men.to_entropy(mnemonic)
+        """
+        Take mnemonic string and return seed bytes
+        :param mnemonic: mnemonic string
+        :param lang: language
+        :return: seed bytes
+
+        :raises:
+            IdentityValidationError: if invalid seed
+            IdentityValidationError: if invalid lang
+            IdentityDependencyError: if incompatible Mnemonic dependency
+        """
+        try:
+            men = Mnemonic(lang)
+            return men.to_entropy(mnemonic)
+        except ConfigurationError as err:
+            raise IdentityDependencyError(f'Dependency Mnemonic Internal Error: {err}') from err
+        except (LookupError, ValueError) as err:
+            raise IdentityValidationError(f'{err}') from err
+        except OSError as err:
+            raise IdentityValidationError(f'Invalid language for mnemonic: {err}') from err
 
     @staticmethod
     def seed_bip39_to_mnemonic(seed: bytes, lang: str = 'english') -> str:
