@@ -1,10 +1,10 @@
 # Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0.
 
-from iotics.lib.identity.const import ISSUER_SEPARATOR
 from typing import Dict
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from iotics.lib.identity.const import ISSUER_SEPARATOR
 from iotics.lib.identity.crypto.issuer import Issuer
 from iotics.lib.identity.error import IdentityResolverDocNotFoundError
 from iotics.lib.identity.register.document import RegisterDocument
