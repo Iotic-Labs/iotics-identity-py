@@ -23,7 +23,7 @@ class KeysHelper:
     @staticmethod
     def get_private_ECDSA(private_expo: str) -> ec.EllipticCurvePrivateKey:
         """
-        Get private key (ECDSA) from master and purpose
+        Get private key (ECDSA) from private exponent
         :param private_expo: private exponent as hex string
         :return: private ECDSA key
 
