@@ -4,6 +4,7 @@ from typing import Dict
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from iotics.lib.identity.const import ISSUER_SEPARATOR
 from iotics.lib.identity.crypto.issuer import Issuer
 from iotics.lib.identity.error import IdentityResolverDocNotFoundError
 from iotics.lib.identity.register.document import RegisterDocument
@@ -15,7 +16,7 @@ class ResolverClientTest(ResolverClient):
         self.docs = docs or {}
 
     def get_document(self, doc_id: str) -> RegisterDocument:
-        doc = self.docs.get(doc_id.split('#')[0])
+        doc = self.docs.get(doc_id.split(ISSUER_SEPARATOR)[0])
         if not doc:
             raise IdentityResolverDocNotFoundError(doc_id)
         return doc
