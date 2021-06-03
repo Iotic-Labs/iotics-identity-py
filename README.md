@@ -5,11 +5,15 @@
 [![PyPi wheel](https://pypip.in/wheel/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity/#files)
 [![PyPi license](https://pypip.in/license/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity)
 
-This is a Python v3.8+ library for Decentralised Identity (DID) management with Iotics.
+Create Data Mesh. Use interoperable digital twins to create data interactions and build powerful real-time data products. This repository is a library for Decentralised Identity (DID) management with Iotics for applications in Python v3.8+.
 
-## License
+You need to have an IOTICSpace to take advantage of this DID SDK. Contact <a href="mailto:product@iotics.com">product@iotics.com</a> for a free trial or [![sign up](https://img.shields.io/badge/sign%20up-164194.svg?style=flat)](https://www.iotics.com/signup-preview-program/)
 
-Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) in the project root for license information.
+## Introduction to Iotics
+
+Interoperate any data, digital twin or service across legacy, on-prem, cloud, IoT, and analytical technologies creating a secure decentralised, federated network of interactions.
+
+Power long-term digital transformation using real-time business event streams. Unlock the power of your business by eliminating complex infrastructure and shortening time-to-value.
 
 ## Identity API
 
@@ -39,6 +43,10 @@ See [Iotics Identity API How To](./how_to/README.md).
 
 * Run BDD tests: \
   `tox -e pytestbdd`
+
+## License
+
+Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) in the project root for license information.
 
 ## Technology Used
 
