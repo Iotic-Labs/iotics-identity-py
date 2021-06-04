@@ -15,6 +15,8 @@ Interoperate any data, digital twin or service across legacy, on-prem, cloud, Io
 
 Power long-term digital transformation using real-time business event streams. Unlock the power of your business by eliminating complex infrastructure and shortening time-to-value.
 
+To learn more about IOTICS see our [website](https://www.iotics.com/) or [documentation site](https://docs.iotics.com).
+
 ## Identity API
 
 The identity API is used to manage identities and authentication in the Iotics Host.
@@ -28,6 +30,8 @@ The API is split in 3 level according to the user needs:
 
 Two examples are provided to illustrate the usage of the **high level API** and the **regular api**.
 See [Iotics Identity API How To](./how_to/README.md).
+
+You can also follow these tutorials on [docs.iotics.com](https://docs.iotics.com/docs/create-decentralized-identity-documents).
 
 * Setup your dev environment: \
   `pip install .[dev]`
