@@ -44,8 +44,8 @@ def other_doc_issuer(other_doc_did):
 
 
 def test_get_key_pair_from_hex_private_key():
-    private_expo = 'a' * 32
-    expected_base58 = 'Na5aHX3iZsWWbmde1HXwKHSZd1YxYJk73gQHd216N8ANXK3uHNcVgq14mRPdScNuxhVNQ4gGuVwHGpTMcQm9qF5w'
+    private_expo = 'a' * 64
+    expected_base58 = 'PbNnn5VGAkos1X5gcduURAAj4J6e3Awe7Wy45TbKS1SNMTHTBsAG4pvJSfx7ui22zXKzdasQ3ym4idkD5b8YTwYh'
     keypair = AdvancedIdentityLocalApi.get_key_pair_from_hex_private_key(private_expo)
     assert keypair.public_base58 == expected_base58
 
