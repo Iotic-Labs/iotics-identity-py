@@ -4,6 +4,8 @@
 [![PyPi downloads](https://pypip.in/d/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity/#files)
 [![PyPi wheel](https://pypip.in/wheel/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity/#files)
 [![PyPi license](https://pypip.in/license/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity)
+[![GitHub Issues](https://img.shields.io/github/issues/Iotic-Labs/iotics-identity-py)](https://github.com/Iotic-Labs/iotics-identity-py/issues)
+[![GitHub Contributors](https://img.shields.io/github/contributors/Iotic-Labs/iotics-identity-py)](https://github.com/Iotic-Labs/iotics-identity-py)
 
 Create Data Mesh. Use interoperable digital twins to create data interactions and build powerful real-time data products. This repository is a library for Decentralised Identity (DID) management with Iotics for applications in Python v3.8+.
 
@@ -47,6 +49,18 @@ You can also follow these tutorials on [docs.iotics.com](https://docs.iotics.com
 
 * Run BDD tests: \
   `tox -e pytestbdd`
+
+## Reporting issues
+
+The issue tracker for this project is currently located at [GitHub](https://github.com/Iotic-Labs/iotics-identity-py/issues).
+
+Please report any issues there with a sufficient description of the bug or feature request. Bug reports should ideally be accompanied by a minimal reproduction of the issue. Irreproducible bugs are difficult to diagnose and fix (and likely to be closed after some period of time).
+
+Bug reports must specify the version of the `iotics-identity-py` module.
+
+## Contributing
+
+This project is open-source and accepts contributions. See the [contribution guide](./CONTRIBUTING.md) for more information.
 
 ## License
 
