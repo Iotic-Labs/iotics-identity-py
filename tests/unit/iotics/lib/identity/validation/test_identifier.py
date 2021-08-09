@@ -9,7 +9,7 @@ from tests.unit.iotics.lib.identity.validation.helper import is_validator_run_su
 
 @pytest.fixture
 def an_identifier():
-    return 'did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY'
+    return 'did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7'
 
 
 def test_validate_identifier_do_not_raises_if_valid_identifier(an_identifier):
