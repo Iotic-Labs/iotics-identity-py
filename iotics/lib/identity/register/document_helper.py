@@ -1,13 +1,17 @@
 # Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0.
 
+import random
+import string
 from typing import Callable, Optional
 
 import base58
 
+from iotics.lib.identity.const import ISSUER_SEPARATOR
 from iotics.lib.identity.crypto.identity import make_identifier
 from iotics.lib.identity.crypto.issuer import Issuer, IssuerKey
 from iotics.lib.identity.register.document import RegisterDocument
 from iotics.lib.identity.register.keys import RegisterDelegationProof, RegisterKey, RegisterPublicKey
+from iotics.lib.identity.validation.identity import IdentityValidation
 
 GetControllerDocFunc = Callable[[str], RegisterDocument]
 
@@ -166,3 +170,24 @@ class RegisterDocumentHelper:
             IdentityValidationError: if invalid name or did
         """
         return RegisterDocumentHelper.get_valid_issuer_key_for(doc, issuer_name, get_controller_doc, include_auth=True)
+
+    @staticmethod
+    def new_random_name_for_document(doc: RegisterDocument, length: int = 10) -> str:
+        """
+        New random #name that can be added to this document
+        :param doc: existing register document
+        :param length: length of name including #
+        :return: a new random #name (not already existing in this document)
+
+        ;raises:
+            IdentityValidationError: if invalid key name (eg if length too short/long)
+        """
+        length -= 1
+        chars = string.ascii_lowercase + string.digits
+        while True:
+            new_name = ISSUER_SEPARATOR + ''.join(random.choice(chars) for _ in range(length))
+            IdentityValidation.validate_key_name(new_name)
+
+            if not RegisterDocumentHelper.get_issuer_register_key(new_name, doc, True) and \
+               not RegisterDocumentHelper.get_issuer_register_delegation_proof(new_name, doc, True):
+                return new_name

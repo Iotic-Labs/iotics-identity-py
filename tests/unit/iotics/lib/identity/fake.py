@@ -4,6 +4,7 @@ from typing import Dict
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from iotics.lib.identity import RegisterDocumentBuilder
 from iotics.lib.identity.const import ISSUER_SEPARATOR
 from iotics.lib.identity.crypto.issuer import Issuer
 from iotics.lib.identity.error import IdentityResolverDocNotFoundError
@@ -23,4 +24,4 @@ class ResolverClientTest(ResolverClient):
 
     def register_document(self, document: RegisterDocument, private_key: ec.EllipticCurvePrivateKey,
                           issuer: Issuer, audience: str = ''):
-        self.docs[issuer.did] = document
+        self.docs[issuer.did] = RegisterDocumentBuilder().build_from_dict(document.to_dict())

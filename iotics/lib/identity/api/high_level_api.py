@@ -15,7 +15,7 @@ class HighLevelIdentityApi:
 
     def create_user_and_agent_with_auth_delegation(self, user_seed: bytes, user_key_name: str,
                                                    agent_seed: bytes, agent_key_name: str,
-                                                   delegation_name: str,
+                                                   delegation_name: str = None,
                                                    user_name: str = None, agent_name: str = None,
                                                    user_password: str = '', agent_password: str = '',
                                                    override_docs: bool = False, ) -> Tuple[RegisteredIdentity,
@@ -31,7 +31,7 @@ class HighLevelIdentityApi:
         :param agent_key_name: agent key name (secrets)
         :param agent_password: Optional agent password (secrets)
         :param agent_name: Optional agent name (default #agent-0) following this pattern: '#[a-zA-Z\\-\\_0-9]{1, 24}'
-        :param delegation_name: user/agent authentication delegation name
+        :param delegation_name: Optional delegation name. If None a random name will be chosen
         :param override_docs: override registered identity documents if already exist (default False)
         :return: user registered identity, agent registered identity
 
@@ -103,7 +103,7 @@ class HighLevelIdentityApi:
 
     def create_twin_with_control_delegation(self, twin_seed: bytes, twin_key_name: str,
                                             agent_registered_identity: RegisteredIdentity,
-                                            delegation_name: str,
+                                            delegation_name: str = None,
                                             twin_name: str = None,
                                             password: str = '',
                                             override_doc: bool = False) -> RegisteredIdentity:
@@ -112,7 +112,8 @@ class HighLevelIdentityApi:
         The agent can control the twin.
         :param twin_seed: twin seed (secrets)
         :param twin_key_name: twin key name (secrets)
-        :param password: Optional twin password (secrets)
+        :param agent_registered_identity: Agent identity
+        :param delegation_name: Optional delegation name. If None a random name will be chosen
         :param twin_name: Optional twin name (default #twin-0) following this pattern: '#[a-zA-Z\\-\\_0-9]{1, 24}'
         :param override_doc: override registered identity document if already exist (default False)
         :return: twin registered identity
