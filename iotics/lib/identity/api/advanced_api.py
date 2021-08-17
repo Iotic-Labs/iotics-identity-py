@@ -684,14 +684,14 @@ class AdvancedIdentityRegisterApi:
                          key_name=delegation_name, revoked=revoked)
 
     def delegate_authentication(self, delegating_secrets: KeyPairSecrets, delegating_did: str,
-                                subject_secrets: KeyPairSecrets, subject_did: str, delegation_name):
+                                subject_secrets: KeyPairSecrets, subject_did: str, delegation_name: str = None):
         """
         Delegate authentication between delegating registered identity and delegated registered identity.
         :param delegating_secrets: delegating identity secrets
         :param delegating_did: delegating identity decentralised identifier
         :param subject_secrets: subject/delegated identity secrets
         :param subject_did: subject/delegated identity decentralised identifier
-        :param delegation_name: register authentication delegation proof name
+        :param delegation_name: Optional delegation name. If None a random name will be chosen
 
         :raises:
             IdentityValidationError: if invalid secrets
@@ -713,18 +713,31 @@ class AdvancedIdentityRegisterApi:
         subject_issuer, proof = AdvancedIdentityLocalApi.create_delegation_proof(delegating_issuer,
                                                                                  subject_doc,
                                                                                  subject_secrets)
+
+        existing_delegation = RegisterDocumentHelper.get_register_delegation_proof_by_controller(subject_issuer,
+                                                                                                 delegating_doc,
+                                                                                                 True)
+        if existing_delegation and (
+            not delegation_name or delegation_name == existing_delegation.name
+        ):
+            # Found an existing delegation with matching controller and name. Nothing to do.
+            return
+
+        if not delegation_name:
+            delegation_name = RegisterDocumentHelper.new_random_name_for_document(subject_doc)
+
         self.add_authentication_delegation_proof_to_document(proof, subject_issuer, delegation_name,
                                                              delegating_issuer, delegating_key_pair)
 
     def delegate_control(self, delegating_secrets: KeyPairSecrets, delegating_did: str, subject_secrets: KeyPairSecrets,
-                         subject_did: str, delegation_name):
+                         subject_did: str, delegation_name: str = None):
         """
         Delegate control between delegating registered identity and delegated registered identity.
         :param delegating_secrets: delegating identity secrets
         :param delegating_did: delegating identity decentralised identifier
         :param subject_secrets: subject/delegated identity secrets
         :param subject_did: subject/delegated identity decentralised identifier
-        :param delegation_name: register control delegation proof name
+        :param delegation_name: Optional delegation name. If None a random name will be chosen
 
         :raises:
             IdentityValidationError: if invalid secrets
@@ -746,6 +759,19 @@ class AdvancedIdentityRegisterApi:
         subject_issuer, proof = AdvancedIdentityLocalApi.create_delegation_proof(delegating_issuer,
                                                                                  subject_doc,
                                                                                  subject_secrets)
+
+        existing_delegation = RegisterDocumentHelper.get_register_delegation_proof_by_controller(subject_issuer,
+                                                                                                 delegating_doc,
+                                                                                                 False)
+        if existing_delegation and (
+            not delegation_name or delegation_name == existing_delegation.name
+        ):
+            # Found an existing delegation with matching controller and name. Nothing to do.
+            return
+
+        if not delegation_name:
+            delegation_name = RegisterDocumentHelper.new_random_name_for_document(subject_doc)
+
         self.add_control_delegation_proof_to_document(proof, subject_issuer, delegation_name,
                                                       delegating_issuer, delegating_key_pair)
 

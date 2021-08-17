@@ -146,13 +146,13 @@ class IdentityApi:
 
     def user_delegates_authentication_to_agent(self, user_registered_identity: RegisteredIdentity,
                                                agent_registered_identity: RegisteredIdentity,
-                                               delegation_name: str):
+                                               delegation_name: str = None):
         """
         User delegates authentication to agent.
         The agent can authenticate on behalf of the user.
         :param user_registered_identity: user registered identity
         :param agent_registered_identity: agent registered identity
-        :param delegation_name: register authentication delegation proof name
+        :param delegation_name: Optional delegation name. If None a random name will be chosen
 
         :raises:
             IdentityValidationError: if registered identities
@@ -170,12 +170,12 @@ class IdentityApi:
 
     def twin_delegates_control_to_agent(self, twin_registered_identity: RegisteredIdentity,
                                         agent_registered_identity: RegisteredIdentity,
-                                        delegation_name: str):
+                                        delegation_name: str = None):
         """
         Twin delegates control to the agent. The agent can control the twin.
         :param twin_registered_identity: twin registered identity
         :param agent_registered_identity: agent registered identity
-        :param delegation_name: register authentication delegation proof name
+        :param delegation_name: Optional delegation name. If None a random name will be chosen
 
         :raises:
            IdentityValidationError: if registered identities
