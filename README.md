@@ -24,14 +24,14 @@ To learn more about IOTICS see our [website](https://www.iotics.com/) or [docume
 The identity API is used to manage identities and authentication in the Iotics Host.
 The API is split in 3 level according to the user needs:
 
-* [High level identity API](iotics/lib/identity/api/high_level_api.py): minimal set of features to interact with Iotics Host
-* [Identity API](iotics/lib/identity/api/regular_api.py): set of features for basic identities management
-* [Advanced identity API](iotics/lib/identity/api/advanced_api.py): set of features for advanced identities management
+* [High level identity API](https://github.com/Iotic-Labs/iotics-identity-py/tree/main/iotics/lib/identity/api/high_level_api.py): minimal set of features to interact with Iotics Host
+* [Identity API](https://github.com/Iotic-Labs/iotics-identity-py/tree/main/iotics/lib/identity/api/regular_api.py): set of features for basic identities management
+* [Advanced identity API](https://github.com/Iotic-Labs/iotics-identity-py/tree/main/iotics/lib/identity/api/advanced_api.py): set of features for advanced identities management
 
 ## How to
 
 Two examples are provided to illustrate the usage of the **high level API** and the **regular api**.
-See [Iotics Identity API How To](./how_to/README.md).
+See [Iotics Identity API How To](https://github.com/Iotic-Labs/iotics-identity-py/tree/main/how_to/README.md).
 
 You can also follow these tutorials on [docs.iotics.com](https://docs.iotics.com/docs/create-decentralized-identity-documents).
 
@@ -60,11 +60,11 @@ Bug reports must specify the version of the `iotics-identity-py` module.
 
 ## Contributing
 
-This project is open-source and accepts contributions. See the [contribution guide](./CONTRIBUTING.md) for more information.
+This project is open-source and accepts contributions. See the [contribution guide](https://github.com/Iotic-Labs/iotics-identity-py/tree/main/CONTRIBUTING.md) for more information.
 
 ## License
 
-Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) in the project root for license information.
+Copyright (c) IOTIC LABS LIMITED. All rights reserved. Licensed under the Apache License, Version 2.0. See [LICENSE](https://github.com/Iotic-Labs/iotics-identity-py/tree/main/LICENSE) in the project root for license information.
 
 ## Technology Used
 
