@@ -2,6 +2,7 @@
 
 import pytest
 
+from iotics.lib.identity import DelegationProofType
 from iotics.lib.identity.const import DOCUMENT_AUTHENTICATION_TYPE, DOCUMENT_PUBLIC_KEY_TYPE
 from iotics.lib.identity.error import IdentityValidationError
 from iotics.lib.identity.register.keys import RegisterAuthenticationPublicKey, RegisterDelegationProof, \
@@ -53,9 +54,10 @@ def test_build_register_auth_key_from_dict_raises_validation_error_if_invalid_di
         RegisterAuthenticationPublicKey.from_dict({'invalid': 'data'})
 
 
-def test_can_build_register_delegation_proof(valid_key_name, a_proof, a_controller):
+@pytest.mark.parametrize('proof_type', list(DelegationProofType))
+def test_can_build_register_delegation_proof(valid_key_name, a_proof, a_controller, proof_type):
     key = RegisterDelegationProof(name=valid_key_name, controller=a_controller,
-                                  proof=a_proof, revoked=False)
+                                  proof=a_proof, revoked=False, proof_type=proof_type)
     assert key.name == valid_key_name
     assert key.controller == a_controller
     assert key.proof == a_proof
@@ -64,6 +66,7 @@ def test_can_build_register_delegation_proof(valid_key_name, a_proof, a_controll
     assert key.to_dict() == {'id': valid_key_name,
                              'controller': str(a_controller),
                              'proof': a_proof,
+                             'proofType': proof_type.value,
                              'revoked': False}
 
 
@@ -75,6 +78,34 @@ def test_build_register_delegation_proof_raises_validation_error_if_invalid_name
 def test_build_register_delegation_proof_from_dict_raises_validation_error_if_invalid_dict():
     with pytest.raises(IdentityValidationError):
         RegisterDelegationProof.from_dict({'invalid': 'data'})
+
+
+@pytest.mark.parametrize('proof_type', list(DelegationProofType))
+def test_can_build_register_delegation_proof_from_dict(valid_key_name, a_proof, a_controller, proof_type):
+    key = RegisterDelegationProof(name=valid_key_name, controller=a_controller,
+                                  proof=a_proof, revoked=False, proof_type=proof_type)
+    from_dict_key = RegisterDelegationProof.from_dict(key.to_dict())
+    assert key == from_dict_key
+
+
+def test_can_build_register_delegation_proof_from_dict_with_missing_proof_type(valid_key_name, a_proof, a_controller):
+    key = RegisterDelegationProof(name=valid_key_name, controller=a_controller,
+                                  proof=a_proof, revoked=False)
+    as_dict = key.to_dict()
+    as_dict.pop('proofType')
+    from_dict_key = RegisterDelegationProof.from_dict(as_dict)
+    assert from_dict_key.proof_type == DelegationProofType.DID
+
+
+def test_build_register_delegation_proof_from_dict_raises_validation_error_if_invalid_proof_type(valid_key_name,
+                                                                                                 a_proof,
+                                                                                                 a_controller):
+    key = RegisterDelegationProof(name=valid_key_name, controller=a_controller,
+                                  proof=a_proof, revoked=False)
+    as_dict = key.to_dict()
+    as_dict['proofType'] = 'invalid'
+    with pytest.raises(IdentityValidationError):
+        RegisterDelegationProof.from_dict(as_dict)
 
 
 def test_is_equal_register_delegation_proof(valid_key_name, a_proof, a_controller):
@@ -90,6 +121,14 @@ def test_not_is_equal_register_delegation_proof(valid_key_name, a_proof, a_contr
                                    proof=a_proof, revoked=False)
     key2 = RegisterDelegationProof(name=valid_key_name, controller=b_controller,
                                    proof='difference_ignored', revoked=False)
+    assert not key1.is_equal(key2)
+
+
+def test_not_is_equal_register_delegation_proof_type(valid_key_name, a_proof, a_controller):
+    key1 = RegisterDelegationProof(name=valid_key_name, controller=a_controller,
+                                   proof=a_proof, revoked=False, proof_type=DelegationProofType.DID)
+    key2 = RegisterDelegationProof(name=valid_key_name, controller=a_controller,
+                                   proof='difference_ignored', revoked=False, proof_type=DelegationProofType.GENERIC)
     assert not key1.is_equal(key2)
 
 

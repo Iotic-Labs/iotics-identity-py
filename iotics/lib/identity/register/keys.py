@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 from typing import Optional
 
 from iotics.lib.identity.const import DOCUMENT_AUTHENTICATION_TYPE, DOCUMENT_PUBLIC_KEY_TYPE
@@ -155,11 +156,28 @@ class RegisterAuthenticationPublicKey(RegisterKey):
         return RegisterAuthenticationPublicKey(name=name, base58=public_base58, revoked=revoked)  # type: ignore
 
 
+class DelegationProofType(Enum):
+    """
+    Delegation proof type.
+        - DID:      that means the proof can be used to setup a delegation from single delegating subject.
+                    The signed proof content is the encoded DID Identifier of the delegating subject.
+        - GENERIC:  that means the proof can be used to setup a delegation from several delegating subjects.
+                    The signed proof content is an empty byte array.
+    """
+    DID = 'did'
+    GENERIC = 'generic'
+
+    @staticmethod
+    def from_value(value: Optional[str]):
+        return DelegationProofType(value) if value else None
+
+
 @dataclass(frozen=True)
 class RegisterDelegationProof(RegisterKeyBase):
     controller: Issuer
     proof: str
     revoked: bool
+    proof_type: DelegationProofType = DelegationProofType.DID
 
     def is_equal(self, other: 'RegisterDelegationProof') -> bool:  # type: ignore
         """
@@ -170,12 +188,16 @@ class RegisterDelegationProof(RegisterKeyBase):
         :param other: Other register delegation proof to compare
         :return: True if equal
         """
-        return self.name == other.name and self.controller == other.controller and self.revoked == other.revoked
+        return (self.name == other.name
+                and self.controller == other.controller
+                and self.revoked == other.revoked
+                and self.proof_type == other.proof_type)
 
     def to_dict(self):
         return {'id': self.name,
                 'controller': str(self.controller),
                 'proof': self.proof,
+                'proofType': self.proof_type.value,
                 'revoked': self.revoked}
 
     def get_new_key(self, revoked: bool) -> 'RegisterDelegationProof':
@@ -201,19 +223,23 @@ class RegisterDelegationProof(RegisterKeyBase):
         """
         try:
             controller = Issuer.from_string(data['controller'])
+            proof_type = DelegationProofType(data.get('proofType', DelegationProofType.DID.value))
             return RegisterDelegationProof.build(data['id'], controller, data['proof'],
-                                                 data.get('revoked', False))
+                                                 data.get('revoked', False),
+                                                 proof_type)
         except (TypeError, KeyError, ValueError) as err:
             raise IdentityValidationError(f'Can not parse invalid register delegation proof: \'{err}\'') from err
 
     @staticmethod
-    def build(name: str, controller: Issuer, proof: str, revoked: Optional[bool] = False) -> 'RegisterDelegationProof':
+    def build(name: str, controller: Issuer, proof: str, revoked: Optional[bool] = False,
+              p_type: Optional[DelegationProofType] = DelegationProofType.DID) -> 'RegisterDelegationProof':
         """
         Build a register delegation public key.
         :param name: key name
         :param controller: delegation controller
         :param proof: delegation proof
         :param revoked: is revoked key (default=False)
+        :param p_type: the type of the proof in use
         :return: valid register delegation public key
 
          :raises:
@@ -221,4 +247,4 @@ class RegisterDelegationProof(RegisterKeyBase):
              IdentityValidationError: if invalid delegation controller
         """
         IdentityValidation.validate_key_name(name)
-        return RegisterDelegationProof(name, controller, proof, revoked)  # type: ignore
+        return RegisterDelegationProof(name, controller, proof, revoked, p_type)  # type: ignore

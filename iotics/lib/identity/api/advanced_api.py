@@ -2,10 +2,11 @@
 import secrets
 from typing import Callable, Optional, Tuple
 
-from iotics.lib.identity.const import ISSUER_SEPARATOR
 from iotics.lib.identity.api.advanced_api_keys import RegisterAuthDelegPublicDocKeysApi, RegisterAuthPublicDocKeysApi, \
     RegisterCtrlDelegPublicDocKeysApi, RegisterPublicDocKeysApi
-from iotics.lib.identity.const import DEFAULT_TOKEN_START_OFFSET_SECONDS
+from iotics.lib.identity.api.advanced_api_proof import APIProof, APIDidDelegationProof, \
+    APIGenericDelegationProof, get_proof_type
+from iotics.lib.identity.const import DEFAULT_TOKEN_START_OFFSET_SECONDS, ISSUER_SEPARATOR
 from iotics.lib.identity.crypto.identity import make_identifier
 from iotics.lib.identity.crypto.issuer import Issuer, IssuerKey
 from iotics.lib.identity.crypto.jwt import JwtTokenHelper
@@ -18,8 +19,7 @@ from iotics.lib.identity.register.document import RegisterDocument
 from iotics.lib.identity.register.document_builder import RegisterDocumentBuilder
 from iotics.lib.identity.register.document_helper import RegisterDocumentHelper
 from iotics.lib.identity.register.key_pair import RegisteredIdentity
-from iotics.lib.identity.register.keys import RegisterDelegationProof, \
-    RegisterPublicKey
+from iotics.lib.identity.register.keys import DelegationProofType, RegisterDelegationProof, RegisterPublicKey
 from iotics.lib.identity.register.resolver import ResolverClient
 from iotics.lib.identity.validation.document import DocumentValidation
 
@@ -107,7 +107,7 @@ class AdvancedIdentityLocalApi:
                                                 start_offset)
 
     @staticmethod
-    def create_proof(key_secrets: KeyPairSecrets, issuer: Issuer, content: bytes) -> Proof:
+    def create_proof(key_secrets: KeyPairSecrets, issuer: Issuer, content: bytes) -> APIProof:
         """
         Create a proof.
         :param key_secrets: secrets used to build the proof signature
@@ -119,14 +119,14 @@ class AdvancedIdentityLocalApi:
             IdentityValidationError: if invalid secrets
             IdentityDependencyError: if incompatible library dependency
         """
-        return Proof.build(key_secrets, issuer, content=content)
+        return APIProof.build(key_secrets, issuer, content=content)
 
     @staticmethod
     def create_delegation_proof(delegating_issuer: Issuer,
                                 subject_doc: RegisterDocument,
-                                subject_secrets: KeyPairSecrets) -> Tuple[Issuer, Proof]:
+                                subject_secrets: KeyPairSecrets) -> Tuple[Issuer, APIDidDelegationProof]:
         """
-        Create a delegation proof.
+        Create a delegation proof that can be used to setup a delegation from a single delegating issuer.
         :param delegating_issuer: delegating issuer
         :param subject_doc: subject/delegated register document
         :param subject_secrets: subject/delegated secrets
@@ -140,8 +140,27 @@ class AdvancedIdentityLocalApi:
         subject_key_pair = KeyPairSecretsHelper.get_key_pair(subject_secrets)
         subject_issuer = AdvancedIdentityLocalApi.get_issuer_by_public_key(subject_doc,
                                                                            subject_key_pair.public_base58)
-        proof = AdvancedIdentityLocalApi.create_proof(subject_secrets, subject_issuer,
-                                                      content=delegating_issuer.did.encode())
+        proof = APIDidDelegationProof.build(subject_secrets, subject_issuer, delegating_issuer.did)
+        return subject_issuer, proof
+
+    @staticmethod
+    def create_generic_delegation_proof(subject_doc: RegisterDocument,
+                                        subject_secrets: KeyPairSecrets) -> Tuple[Issuer, APIGenericDelegationProof]:
+        """
+        Create a delegation proof that can be re-used to setup a delegation from several delegating issuers.
+        :param subject_doc: subject/delegated register document
+        :param subject_secrets: subject/delegated secrets
+        :return: subject/delegated issuer and proof
+
+        :raises:
+            IdentityValidationError: if invalid secrets
+            IdentityRegisterIssuerNotFoundError: if the issuer matching the subject/delegated secrets is not found
+            IdentityDependencyError: if incompatible library dependency
+        """
+        subject_key_pair = KeyPairSecretsHelper.get_key_pair(subject_secrets)
+        subject_issuer = AdvancedIdentityLocalApi.get_issuer_by_public_key(subject_doc,
+                                                                           subject_key_pair.public_base58)
+        proof = APIGenericDelegationProof.build(subject_secrets, subject_issuer)
         return subject_issuer, proof
 
     @staticmethod
@@ -563,7 +582,7 @@ class AdvancedIdentityRegisterApi:
                          key_name=name, revoked=revoked)
         return Issuer.build(doc_owner_issuer.did, name)
 
-    def add_authentication_delegation_proof_to_document(self, proof: Proof,
+    def add_authentication_delegation_proof_to_document(self, proof: APIProof,
                                                         subject_issuer: Issuer,
                                                         delegation_name: str,
                                                         doc_owner_issuer: Issuer,
@@ -583,7 +602,8 @@ class AdvancedIdentityRegisterApi:
             IdentityInvalidDocumentError: if invalid register document
             IdentityResolverError: if resolver error
         """
-        key = RegisterDelegationProof.build(delegation_name, subject_issuer, proof.signature)
+        key = RegisterDelegationProof.build(delegation_name, subject_issuer, proof.signature,
+                                            p_type=get_proof_type(proof))
         self._update_doc(doc_owner_key_pair, doc_owner_issuer, get_updated_doc=self.auth_deleg_api.add_doc_key, key=key)
 
     def remove_authentication_delegation_proof_from_document(self, delegation_name: str,
@@ -623,7 +643,7 @@ class AdvancedIdentityRegisterApi:
         self._update_doc(doc_owner_key_pair, doc_owner_issuer, get_updated_doc=self.auth_deleg_api.revoke_doc_key,
                          key_name=delegation_name, revoked=revoked)
 
-    def add_control_delegation_proof_to_document(self, proof: Proof,
+    def add_control_delegation_proof_to_document(self, proof: APIProof,
                                                  subject_issuer: Issuer,
                                                  delegation_name: str,
                                                  doc_owner_issuer: Issuer,
@@ -643,7 +663,8 @@ class AdvancedIdentityRegisterApi:
             IdentityInvalidDocumentError: if invalid register document
             IdentityResolverError: if resolver error
        """
-        key = RegisterDelegationProof.build(delegation_name, subject_issuer, proof.signature)
+        key = RegisterDelegationProof.build(delegation_name, subject_issuer, proof.signature,
+                                            p_type=get_proof_type(proof))
         self._update_doc(doc_owner_key_pair, doc_owner_issuer, get_updated_doc=self.ctrl_deleg_api.add_doc_key, key=key)
 
     def remove_control_delegation_proof_from_document(self, delegation_name: str,
@@ -683,8 +704,40 @@ class AdvancedIdentityRegisterApi:
         self._update_doc(doc_owner_key_pair, doc_owner_issuer, get_updated_doc=self.ctrl_deleg_api.revoke_doc_key,
                          key_name=delegation_name, revoked=revoked)
 
+    def _delegate(self, delegating_secrets: KeyPairSecrets, delegating_did: str,
+                  subject_secrets: KeyPairSecrets, subject_did: str, delegation_name: str,
+                  proof_type: DelegationProofType, delegation_proof_add_method: Callable):
+        delegating_doc = self.get_register_document(delegating_did)
+        subject_doc = self.get_register_document(subject_did)
+        delegating_key_pair = KeyPairSecretsHelper.get_key_pair(delegating_secrets)
+        delegating_issuer = AdvancedIdentityLocalApi.get_issuer_by_public_key(delegating_doc,
+                                                                              delegating_key_pair.public_base58)
+        if proof_type == DelegationProofType.GENERIC:
+            subject_issuer, proof = AdvancedIdentityLocalApi.create_generic_delegation_proof(subject_doc,
+                                                                                             subject_secrets)
+        else:
+            subject_issuer, proof = AdvancedIdentityLocalApi.create_delegation_proof(delegating_issuer,
+                                                                                     subject_doc,
+                                                                                     subject_secrets)
+
+        existing_delegation = RegisterDocumentHelper.get_register_delegation_proof_by_controller(subject_issuer,
+                                                                                                 delegating_doc,
+                                                                                                 True)
+        if existing_delegation and (
+                not delegation_name or delegation_name == existing_delegation.name
+        ):
+            # Found an existing delegation with matching controller and name. Nothing to do.
+            return
+
+        if not delegation_name:
+            delegation_name = RegisterDocumentHelper.new_random_name_for_document(subject_doc)
+
+        delegation_proof_add_method(proof, subject_issuer, delegation_name,
+                                    delegating_issuer, delegating_key_pair)
+
     def delegate_authentication(self, delegating_secrets: KeyPairSecrets, delegating_did: str,
-                                subject_secrets: KeyPairSecrets, subject_did: str, delegation_name: str = None):
+                                subject_secrets: KeyPairSecrets, subject_did: str, delegation_name: str = None,
+                                proof_type: DelegationProofType = DelegationProofType.DID):
         """
         Delegate authentication between delegating registered identity and delegated registered identity.
         :param delegating_secrets: delegating identity secrets
@@ -692,6 +745,9 @@ class AdvancedIdentityRegisterApi:
         :param subject_secrets: subject/delegated identity secrets
         :param subject_did: subject/delegated identity decentralised identifier
         :param delegation_name: Optional delegation name. If None a random name will be chosen
+        :param proof_type: Delegation proof type. By default: set to DID, that means the proof can be used to setup a
+        delegation from single delegating issuer. GENERIC means the proof can be used to setup a delegation from
+         several delegating issuers.
 
         :raises:
             IdentityValidationError: if invalid secrets
@@ -704,33 +760,17 @@ class AdvancedIdentityRegisterApi:
             IdentityResolverError: if resolver error
             IdentityDependencyError: if incompatible library dependency
         """
-        delegating_doc = self.get_register_document(delegating_did)
-        subject_doc = self.get_register_document(subject_did)
-        delegating_key_pair = KeyPairSecretsHelper.get_key_pair(delegating_secrets)
-        delegating_issuer = AdvancedIdentityLocalApi.get_issuer_by_public_key(delegating_doc,
-                                                                              delegating_key_pair.public_base58)
-
-        subject_issuer, proof = AdvancedIdentityLocalApi.create_delegation_proof(delegating_issuer,
-                                                                                 subject_doc,
-                                                                                 subject_secrets)
-
-        existing_delegation = RegisterDocumentHelper.get_register_delegation_proof_by_controller(subject_issuer,
-                                                                                                 delegating_doc,
-                                                                                                 True)
-        if existing_delegation and (
-            not delegation_name or delegation_name == existing_delegation.name
-        ):
-            # Found an existing delegation with matching controller and name. Nothing to do.
-            return
-
-        if not delegation_name:
-            delegation_name = RegisterDocumentHelper.new_random_name_for_document(subject_doc)
-
-        self.add_authentication_delegation_proof_to_document(proof, subject_issuer, delegation_name,
-                                                             delegating_issuer, delegating_key_pair)
+        self._delegate(delegating_secrets,
+                       delegating_did,
+                       subject_secrets,
+                       subject_did,
+                       delegation_name,
+                       proof_type,
+                       delegation_proof_add_method=self.add_authentication_delegation_proof_to_document)
 
     def delegate_control(self, delegating_secrets: KeyPairSecrets, delegating_did: str, subject_secrets: KeyPairSecrets,
-                         subject_did: str, delegation_name: str = None):
+                         subject_did: str, delegation_name: str = None,
+                         proof_type: DelegationProofType = DelegationProofType.DID):
         """
         Delegate control between delegating registered identity and delegated registered identity.
         :param delegating_secrets: delegating identity secrets
@@ -738,6 +778,9 @@ class AdvancedIdentityRegisterApi:
         :param subject_secrets: subject/delegated identity secrets
         :param subject_did: subject/delegated identity decentralised identifier
         :param delegation_name: Optional delegation name. If None a random name will be chosen
+        :param proof_type: Delegation proof type. By default: set to DID, that means the proof can be used to setup a
+        delegation from single delegating issuer. GENERIC means the proof can be used to setup a delegation from
+         several delegating issuers.
 
         :raises:
             IdentityValidationError: if invalid secrets
@@ -750,30 +793,13 @@ class AdvancedIdentityRegisterApi:
             IdentityResolverError: if resolver error
             IdentityDependencyError: if incompatible library dependency
         """
-        delegating_doc = self.get_register_document(delegating_did)
-        subject_doc = self.get_register_document(subject_did)
-        delegating_key_pair = KeyPairSecretsHelper.get_key_pair(delegating_secrets)
-        delegating_issuer = AdvancedIdentityLocalApi.get_issuer_by_public_key(delegating_doc,
-                                                                              delegating_key_pair.public_base58)
-
-        subject_issuer, proof = AdvancedIdentityLocalApi.create_delegation_proof(delegating_issuer,
-                                                                                 subject_doc,
-                                                                                 subject_secrets)
-
-        existing_delegation = RegisterDocumentHelper.get_register_delegation_proof_by_controller(subject_issuer,
-                                                                                                 delegating_doc,
-                                                                                                 False)
-        if existing_delegation and (
-            not delegation_name or delegation_name == existing_delegation.name
-        ):
-            # Found an existing delegation with matching controller and name. Nothing to do.
-            return
-
-        if not delegation_name:
-            delegation_name = RegisterDocumentHelper.new_random_name_for_document(subject_doc)
-
-        self.add_control_delegation_proof_to_document(proof, subject_issuer, delegation_name,
-                                                      delegating_issuer, delegating_key_pair)
+        self._delegate(delegating_secrets,
+                       delegating_did,
+                       subject_secrets,
+                       subject_did,
+                       delegation_name,
+                       proof_type,
+                       delegation_proof_add_method=self.add_control_delegation_proof_to_document)
 
     def get_proof_from_challenge_token(self, challenge_token: str) -> Proof:
         """
