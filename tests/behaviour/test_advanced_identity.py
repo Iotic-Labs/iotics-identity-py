@@ -7,7 +7,7 @@ import pytest
 from pytest_bdd import given, scenario, then, when
 
 from iotics.lib.identity import AdvancedIdentityLocalApi, AdvancedIdentityRegisterApi, DIDType, IdentityApi, Issuer, \
-    KeyPairSecretsHelper, Proof, RegisteredIdentity, ResolverSerializer, RESTResolverClient
+    KeyPairSecretsHelper, RegisteredIdentity, ResolverSerializer, RESTResolverClient, APIProof
 from tests.behaviour.common import assert_owner_is_allowed, assert_owner_key, assert_owner_not_allowed_anymore, \
     assert_owner_pub_key_exist, get_allowed_for_auth_and_control_error, get_allowed_for_auth_error, \
     get_allowed_for_control_error, get_secrets_by_type, RESTRequesterTest
@@ -97,7 +97,7 @@ class RegisteredIdentitiesExistingRegDelegProofCtx(RegisteredIdentitiesForDelegC
 
 @dataclass(frozen=True)
 class RegisteredIdentitiesAddDelegProofCtx(RegisteredIdentitiesExistingRegDelegProofCtx):
-    proof: Proof
+    proof: APIProof
 
 
 @dataclass(frozen=True)
@@ -214,13 +214,31 @@ def given_a_register_identity_ida_owning_the_delegating_doc_and_a_register_ident
     ))
 
 
-@given('a DelegatingRId owning a document and a delegation proof created by a DelegatedRId', target_fixture='context')
+@given('a DelegatingRId owning a document and a delegation did proof created by a DelegatedRId',
+       target_fixture='context')
 def given_a_reg_identity_ida_owning_the_delegating_doc_and_a_delegation_proof_created_by_an_other_registered_identity():
     delegating_id = get_registered_identity('#Delegating')
     delegated_id = get_registered_identity('#Delegated')
     subject_doc = ADVANCED_API.get_register_document(delegated_id.registered_identity.did)
     subject_issuer, delegation_proof = AdvancedIdentityLocalApi.create_delegation_proof(
         delegating_issuer=delegating_id.registered_identity.issuer,
+        subject_doc=subject_doc,
+        subject_secrets=delegated_id.registered_identity.key_pair_secrets)
+    return get_new_context(RegisteredIdentitiesAddDelegProofCtx(
+        delegating_id=delegating_id.registered_identity,
+        delegated_id=delegated_id.registered_identity,
+        proof=delegation_proof,
+        delegation_name='#DelegFromPRoof'
+    ))
+
+
+@given('a DelegatingRId owning a document and a delegation generic proof created by a DelegatedRId',
+       target_fixture='context')
+def given_a_reg_identity_ida_owning_the_delegating_doc_and_a_delegation_reusable_proof_created_by_an_other_reg_id():
+    delegating_id = get_registered_identity('#Delegating')
+    delegated_id = get_registered_identity('#Delegated')
+    subject_doc = ADVANCED_API.get_register_document(delegated_id.registered_identity.did)
+    subject_issuer, delegation_proof = AdvancedIdentityLocalApi.create_generic_delegation_proof(
         subject_doc=subject_doc,
         subject_secrets=delegated_id.registered_identity.key_pair_secrets)
     return get_new_context(RegisteredIdentitiesAddDelegProofCtx(
@@ -896,9 +914,16 @@ def test_add_a_control_delegation_between_2_existing_registered_identities():
 
 
 @scenario('advanced_identity_api.feature',
-          'Add a control delegation proof (created by an other registered identity) to a document',
+          'Add a control delegation did proof (created by an other registered identity) to a document',
           features_base_dir=FEATURES)
 def test_add_a_control_delegation_proof_from_an_other_registered_identity_to_a_document():
+    pass
+
+
+@scenario('advanced_identity_api.feature',
+          'Add a control delegation generic proof (created by an other registered identity) to a document',
+          features_base_dir=FEATURES)
+def test_add_a_control_delegation_reusable_proof_from_an_other_registered_identity_to_a_document():
     pass
 
 
@@ -920,9 +945,16 @@ def test_add_an_authentication_delegation_between_2_existing_registered_identiti
 
 
 @scenario('advanced_identity_api.feature',
-          'Add an authentication delegation proof (created by an other registered identity) to a document',
+          'Add an authentication delegation did proof (created by an other registered identity) to a document',
           features_base_dir=FEATURES)
 def test_add_an_authentication_delegation_proof_from_an_other_registered_identity_to_a_document():
+    pass
+
+
+@scenario('advanced_identity_api.feature',
+          'Add an authentication delegation generic proof (created by an other registered identity) to a document',
+          features_base_dir=FEATURES)
+def test_add_an_authentication_delegation_reusable_proof_from_an_other_registered_identity_to_a_document():
     pass
 
 

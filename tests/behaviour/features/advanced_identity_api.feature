@@ -58,8 +58,13 @@ Feature: Advanced Identity API
     When the DelegatingRId delegates control to the DelegatedRId
     Then the DelegatedRId is allowed for control on the document owned by the DelegatingRId
 
-  Scenario: Add a control delegation proof (created by an other registered identity) to a document
-    Given a DelegatingRId owning a document and a delegation proof created by a DelegatedRId
+  Scenario: Add a control delegation did proof (created by an other registered identity) to a document
+    Given a DelegatingRId owning a document and a delegation did proof created by a DelegatedRId
+    When I add the control delegation proof to the document owned by the DelegatingRId
+    Then the DelegatedRId is allowed for control on the document owned by the DelegatingRId
+
+  Scenario: Add a control delegation generic proof (created by an other registered identity) to a document
+    Given a DelegatingRId owning a document and a delegation generic proof created by a DelegatedRId
     When I add the control delegation proof to the document owned by the DelegatingRId
     Then the DelegatedRId is allowed for control on the document owned by the DelegatingRId
 
@@ -78,8 +83,13 @@ Feature: Advanced Identity API
     When the DelegatingRId delegates authentication to the DelegatedRId
     Then the DelegatedRId is allowed for authentication on the document owned by the DelegatingRId
 
-  Scenario: Add an authentication delegation proof (created by an other registered identity) to a document
-    Given a DelegatingRId owning a document and a delegation proof created by a DelegatedRId
+  Scenario: Add an authentication delegation did proof (created by an other registered identity) to a document
+    Given a DelegatingRId owning a document and a delegation did proof created by a DelegatedRId
+    When I add the authentication delegation proof to the document owned by the DelegatingRId
+    Then the DelegatedRId is allowed for authentication on the document owned by the DelegatingRId
+
+  Scenario: Add an authentication delegation generic proof (created by an other registered identity) to a document
+    Given a DelegatingRId owning a document and a delegation generic proof created by a DelegatedRId
     When I add the authentication delegation proof to the document owned by the DelegatingRId
     Then the DelegatedRId is allowed for authentication on the document owned by the DelegatingRId
 

@@ -8,14 +8,15 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from iotics.lib.identity.api.advanced_api import AdvancedIdentityLocalApi, AdvancedIdentityRegisterApi
 from iotics.lib.identity.crypto.identity import make_identifier
 from iotics.lib.identity.crypto.issuer import Issuer
-from iotics.lib.identity.crypto.key_pair_secrets import DIDType
-from iotics.lib.identity.error import IdentityRegisterIssuerNotFoundError, IdentityResolverError, \
-    IdentityDependencyError
+from iotics.lib.identity.crypto.key_pair_secrets import DIDType, KeyPairSecretsHelper
+from iotics.lib.identity.error import IdentityDependencyError, IdentityInvalidDocumentDelegationError, \
+    IdentityRegisterIssuerNotFoundError, IdentityResolverError
 from iotics.lib.identity.register.document import RegisterDocument
-from iotics.lib.identity.register.keys import RegisterDelegationProof, RegisterPublicKey
+from iotics.lib.identity.register.keys import RegisterDelegationProof, RegisterPublicKey, DelegationProofType
 from tests.unit.iotics.lib.identity.fake import ResolverClientTest
 from tests.unit.iotics.lib.identity.helper import get_doc_with_keys
-from tests.unit.iotics.lib.identity.validation.helper import get_delegation_proof, get_valid_document_from_secret
+from tests.unit.iotics.lib.identity.validation.helper import get_delegation_proof, get_new_document, \
+    get_valid_document_from_secret, is_validator_run_success
 
 
 @pytest.fixture
@@ -67,8 +68,18 @@ def test_can_get_delegation_proof(base_doc_issuer, other_key_pair_secrets):
                                 subject_doc=subject_doc,
                                 subject_secrets=other_key_pair_secrets)
     assert subject_issuer.did == subject_doc.did
-    assert subject_issuer.did == subject_doc.did
     assert proof.content == base_doc_issuer.did.encode()
+    assert proof.p_type == DelegationProofType.DID
+
+
+def test_can_get_generic_delegation_proof(other_key_pair_secrets):
+    subject_doc = get_valid_document_from_secret(other_key_pair_secrets, '#DelegatedDoc')
+    subject_issuer, proof = AdvancedIdentityLocalApi. \
+        create_generic_delegation_proof(subject_doc=subject_doc,
+                                        subject_secrets=other_key_pair_secrets)
+    assert subject_issuer.did == subject_doc.did
+    assert proof.content == b''
+    assert proof.p_type == DelegationProofType.GENERIC
 
 
 def test_can_get_document_if_exists(base_doc):
@@ -303,3 +314,81 @@ def test_can_revoke_delegation_proof(base_doc_issuer, valid_key_pair, get_api_ca
     get_api_call(api)(deleg_name, revoked=True, doc_owner_issuer=base_doc_issuer, doc_owner_key_pair=valid_key_pair)
     updated_doc = resolver_client.docs[base_doc_issuer.did]
     assert doc_deleg_set(updated_doc)[deleg_name].revoked
+
+
+@pytest.mark.parametrize('get_delegation_method', (lambda api: api.add_control_delegation_proof_to_document,
+                                                   lambda api: api.add_authentication_delegation_proof_to_document))
+def test_cannot_reuse_did_delegation_proof(get_delegation_method):
+    twin1_secrets, twin1_issuer, twin1_doc = get_new_document('#Twin1')
+    twin2_secrets, twin2_issuer, twin2_doc = get_new_document('#Twin2')
+    agent_secrets, agent1_issuer, agent_doc = get_new_document('#Agent1')
+    resolver_client = ResolverClientTest(docs={
+        twin1_doc.did: twin1_doc,
+        twin2_doc.did: twin2_doc,
+        agent_doc.did: agent_doc,
+    })
+    api = AdvancedIdentityRegisterApi(resolver_client)
+
+    # Create an agent did delegation proof (targeting a single delegating document: twin1)
+    _, proof = AdvancedIdentityLocalApi.create_delegation_proof(delegating_issuer=twin1_issuer,
+                                                                subject_doc=agent_doc,
+                                                                subject_secrets=agent_secrets)
+
+    # Add proof to twin1 document as a delegation proof - the document is valid
+    get_delegation_method(api)(
+        proof=proof,
+        subject_issuer=agent1_issuer,
+        delegation_name='#Deleg1',
+        doc_owner_issuer=twin1_issuer,
+        doc_owner_key_pair=KeyPairSecretsHelper.get_key_pair(twin1_secrets),
+    )
+    assert is_validator_run_success(api.validate_register_document, resolver_client.docs[twin1_doc.did])
+
+    # Add proof to twin2 document as a delegation proof - the document is invalid
+    get_delegation_method(api)(
+        proof=proof,
+        subject_issuer=agent1_issuer,
+        delegation_name='#Deleg2',
+        doc_owner_issuer=twin2_issuer,
+        doc_owner_key_pair=KeyPairSecretsHelper.get_key_pair(twin2_secrets),
+    )
+    with pytest.raises(IdentityInvalidDocumentDelegationError):
+        api.validate_register_document(resolver_client.docs[twin2_doc.did])
+
+
+@pytest.mark.parametrize('get_delegation_method', (lambda api: api.add_control_delegation_proof_to_document,
+                                                   lambda api: api.add_authentication_delegation_proof_to_document))
+def test_can_reuse_generic_delegation_proof(get_delegation_method):
+    twin1_secrets, twin1_issuer, twin1_doc = get_new_document('#Twin1')
+    twin2_secrets, twin2_issuer, twin2_doc = get_new_document('#Twin2')
+    agent_secrets, agent1_issuer, agent_doc = get_new_document('#Agent1')
+    resolver_client = ResolverClientTest(docs={
+        twin1_doc.did: twin1_doc,
+        twin2_doc.did: twin2_doc,
+        agent_doc.did: agent_doc,
+    })
+    api = AdvancedIdentityRegisterApi(resolver_client)
+
+    # Create an agent generic delegation proof
+    _, proof = AdvancedIdentityLocalApi.create_generic_delegation_proof(subject_doc=agent_doc,
+                                                                        subject_secrets=agent_secrets)
+
+    # Add proof to twin1 document as a delegation proof - the document is valid
+    get_delegation_method(api)(
+        proof=proof,
+        subject_issuer=agent1_issuer,
+        delegation_name='#Deleg1',
+        doc_owner_issuer=twin1_issuer,
+        doc_owner_key_pair=KeyPairSecretsHelper.get_key_pair(twin1_secrets),
+    )
+    assert is_validator_run_success(api.validate_register_document, resolver_client.docs[twin1_doc.did])
+
+    # Add proof to twin2 document as a delegation proof - the document is valid
+    get_delegation_method(api)(
+        proof=proof,
+        subject_issuer=agent1_issuer,
+        delegation_name='#Deleg2',
+        doc_owner_issuer=twin2_issuer,
+        doc_owner_key_pair=KeyPairSecretsHelper.get_key_pair(twin2_secrets),
+    )
+    assert is_validator_run_success(api.validate_register_document, resolver_client.docs[twin2_doc.did])

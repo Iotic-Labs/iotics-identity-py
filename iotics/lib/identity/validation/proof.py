@@ -13,7 +13,7 @@ from iotics.lib.identity.error import IdentityInvalidDocumentDelegationError, Id
     IdentityResolverError, \
     IdentityValidationError
 from iotics.lib.identity.register.document import RegisterDocument
-from iotics.lib.identity.register.keys import RegisterDelegationProof
+from iotics.lib.identity.register.keys import DelegationProofType, RegisterDelegationProof, RegisterPublicKey
 from iotics.lib.identity.register.resolver import ResolverClient
 
 
@@ -41,6 +41,19 @@ class ProofValidation:
 
 class DelegationValidation:
     @staticmethod
+    def _is_valid_issuer_or_reusable_proof(deleg_proof: RegisterDelegationProof, public_key: RegisterPublicKey,
+                                           doc_id: str):
+        controller_issuer = deleg_proof.controller
+        if deleg_proof.proof_type == DelegationProofType.DID:
+            proof = Proof(controller_issuer, doc_id.encode('ascii'), deleg_proof.proof)
+            ProofValidation.validate_proof(proof, public_key.base58)
+        elif deleg_proof.proof_type == DelegationProofType.GENERIC:
+            proof = Proof(controller_issuer, b'', deleg_proof.proof)
+            ProofValidation.validate_proof(proof, public_key.base58)
+        else:
+            raise IdentityInvalidProofError(f'Invalid proof: invalid type {deleg_proof.proof_type}')
+
+    @staticmethod
     def validate_delegation_from_doc(doc_id: str, controller_doc: RegisterDocument,
                                      deleg_proof: RegisterDelegationProof):
         """
@@ -60,8 +73,7 @@ class DelegationValidation:
             if not public_key:
                 raise IdentityValidationError(f'Public key \'{controller_issuer.name}\' not found'
                                               f' on controller doc \'{controller_doc.did}\'')
-            proof = Proof(controller_issuer, doc_id.encode('ascii'), deleg_proof.proof)
-            ProofValidation.validate_proof(proof, public_key.base58)
+            DelegationValidation._is_valid_issuer_or_reusable_proof(deleg_proof, public_key, doc_id)
         except IdentityValidationError as err:
             raise IdentityInvalidDocumentDelegationError(f'Invalid delegation for doc \'{doc_id}\''
                                                          f' with controller: \'{deleg_proof.name}\': {err}') from err
