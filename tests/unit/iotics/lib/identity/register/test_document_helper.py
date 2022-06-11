@@ -79,9 +79,9 @@ def test_is_issuer_in_keys_returns_true_if_issuer_in_auth_keys(public_keys, auth
 
 @pytest.fixture
 def control_deleg_proof():
-    issuer1 = Issuer.from_string('did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY#ctrl1')
-    issuer2 = Issuer.from_string('did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY#ctrl2')
-    issuer3 = Issuer.from_string('did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY#ctrl3')
+    issuer1 = Issuer.from_string('did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7#ctrl1')
+    issuer2 = Issuer.from_string('did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7#ctrl2')
+    issuer3 = Issuer.from_string('did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7#ctrl3')
     return {'#DelegCtrlKey1': RegisterDelegationProof.build('#DelegCtrlKey1',
                                                             issuer1,
                                                             proof='proof', revoked=False),
@@ -95,9 +95,9 @@ def control_deleg_proof():
 
 @pytest.fixture
 def auth_deleg_proof():
-    issuer1 = Issuer.from_string('did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY#ctrl1')
-    issuer2 = Issuer.from_string('did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY#ctrl2')
-    issuer3 = Issuer.from_string('did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY#ctrl3')
+    issuer1 = Issuer.from_string('did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7#ctrl1')
+    issuer2 = Issuer.from_string('did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7#ctrl2')
+    issuer3 = Issuer.from_string('did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7#ctrl3')
     return {'#DelegAuthKey1': RegisterDelegationProof.build('#DelegAuthKey1',
                                                             issuer1,
                                                             proof='proof', revoked=False),
@@ -157,7 +157,7 @@ def test_can_get_control_delegation_by_controller(control_deleg_proof, min_doc_o
 
 def test_get_control_delegation_by_controller_returns_none_if_not_found(control_deleg_proof, min_doc_owner_pub_key):
     doc = get_doc_with_keys(deleg_control=control_deleg_proof.values(), public_keys=[min_doc_owner_pub_key])
-    issuer = Issuer.build('did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY', '#DoesNotExist')
+    issuer = Issuer.build('did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7', '#DoesNotExist')
     deleg_proof = RegisterDocumentHelper.get_register_delegation_proof_by_controller(issuer, doc, include_auth=False)
     assert not deleg_proof
 
@@ -173,7 +173,7 @@ def test_can_get_auth_delegation_by_controller(auth_deleg_proof, min_doc_owner_p
 
 def test_get_auth_delegation_by_controller_returns_none_if_not_found(auth_deleg_proof, min_doc_owner_pub_key):
     doc = get_doc_with_keys(deleg_auth=auth_deleg_proof.values(), public_keys=[min_doc_owner_pub_key])
-    issuer = Issuer.build('did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY', '#DoesNotExist')
+    issuer = Issuer.build('did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7', '#DoesNotExist')
     deleg_proof = RegisterDocumentHelper.get_register_delegation_proof_by_controller(issuer, doc, include_auth=True)
     assert not deleg_proof
 
