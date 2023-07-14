@@ -29,7 +29,7 @@ class APIDidDelegationProof(APIProof):
     def p_type(self) -> DelegationProofType:
         return DelegationProofType.DID
 
-    # pylint: disable=arguments-differ
+    # pylint: disable=arguments-renamed
     @staticmethod
     def build(key_pair: KeyPairSecrets, issuer: Issuer, did: str) -> 'APIDidDelegationProof':  # type: ignore
         proof = APIProof.build(key_pair, issuer, did.encode())
