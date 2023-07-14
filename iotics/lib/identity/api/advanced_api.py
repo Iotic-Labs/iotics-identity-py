@@ -716,7 +716,7 @@ class AdvancedIdentityRegisterApi:
             subject_issuer, proof = AdvancedIdentityLocalApi.create_generic_delegation_proof(subject_doc,
                                                                                              subject_secrets)
         else:
-            subject_issuer, proof = AdvancedIdentityLocalApi.create_delegation_proof(delegating_issuer,
+            subject_issuer, proof = AdvancedIdentityLocalApi.create_delegation_proof(delegating_issuer,  # type: ignore
                                                                                      subject_doc,
                                                                                      subject_secrets)
 

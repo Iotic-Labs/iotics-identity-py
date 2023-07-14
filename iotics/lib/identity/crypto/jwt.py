@@ -47,7 +47,7 @@ class JwtTokenHelper:
         try:
             key = KeysHelper.get_public_ECDSA_from_base58(public_base58)
             return jwt.decode(token, key, audience=audience, algorithms=[TOKEN_ALGORITHM],  # type: ignore
-                              verify=True, options={'verify_signature': True})
+                              verify=True, options={'verify_signature': True, 'verify_aud': bool(audience)})
         except jwt.exceptions.InvalidSignatureError as err:
             raise IdentityValidationError(f'Invalid token signature: \'{err}\'') from err
         except jwt.exceptions.ExpiredSignatureError as err:

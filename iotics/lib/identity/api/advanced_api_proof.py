@@ -31,7 +31,7 @@ class APIDidDelegationProof(APIProof):
 
     # pylint: disable=arguments-differ
     @staticmethod
-    def build(key_pair: KeyPairSecrets, issuer: Issuer, did: str) -> 'APIDidDelegationProof':
+    def build(key_pair: KeyPairSecrets, issuer: Issuer, did: str) -> 'APIDidDelegationProof':  # type: ignore
         proof = APIProof.build(key_pair, issuer, did.encode())
         return APIDidDelegationProof(proof.issuer, proof.content, proof.signature)
 
@@ -45,7 +45,7 @@ class APIGenericDelegationProof(APIProof):
 
     # pylint: disable=arguments-differ
     @staticmethod
-    def build(key_pair: KeyPairSecrets, issuer: Issuer) -> 'APIGenericDelegationProof':
+    def build(key_pair: KeyPairSecrets, issuer: Issuer) -> 'APIGenericDelegationProof':  # type: ignore
         proof = APIProof.build(key_pair, issuer, b'')
         return APIGenericDelegationProof(proof.issuer, proof.content, proof.signature)
 
