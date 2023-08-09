@@ -70,11 +70,11 @@ def test_can_build_doc_metadata_from_dict():
     assert metadata.url == data['url']
 
 
-@pytest.mark.parametrize('invalid_input', (dict(label='a' * (DOCUMENT_MAX_LABEL_LENGTH + 1)),
-                                           dict(comment='a' * (DOCUMENT_MAX_COMMENT_LENGTH + 1)),
-                                           dict(url='a' * (DOCUMENT_MAX_URL_LENGTH + 1))))
+@pytest.mark.parametrize('invalid_input', ({'label': 'a' * (DOCUMENT_MAX_LABEL_LENGTH + 1)},
+                                           {'comment': 'a' * (DOCUMENT_MAX_COMMENT_LENGTH + 1)},
+                                           {'url': 'a' * (DOCUMENT_MAX_URL_LENGTH + 1)}))
 def test_build_doc_metadata_raises_validaion_error_in_invalid_data(invalid_input):
-    params = dict(label='a label', comment='a comment', url='http://an/url')
+    params = {'label': 'a label', 'comment': 'a comment', 'url': 'http://an/url'}
     params.update(invalid_input)
     with pytest.raises(IdentityValidationError):
         Metadata.build(**params)
