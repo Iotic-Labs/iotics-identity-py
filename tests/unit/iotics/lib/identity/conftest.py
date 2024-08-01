@@ -83,9 +83,14 @@ def other_key_pair(other_key_pair_secrets):
 
 @pytest.fixture
 def doc_did():
-    return 'did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY'
+    return 'did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7'
 
 
 @pytest.fixture
 def deleg_doc_did():
-    return 'did:iotics:iotHHHHKpPGWWWC4FFo4d6oyzVVk6MXLmEgY'
+    return 'did:iotics:iotDX4pLcd4y9RA6EvUrj6QaLSjxsZT6EEPJ'
+
+
+@pytest.fixture
+def another_doc_did():
+    return 'did:iotics:iotCmGJdzEte5dtvjjUspcoAeiWk5D5NTTyE'
