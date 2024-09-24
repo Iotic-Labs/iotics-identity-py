@@ -35,7 +35,7 @@ See [Iotics Identity API How To](https://github.com/Iotic-Labs/iotics-identity-p
 You can also follow these tutorials on [docs.iotics.com](https://docs.iotics.com/docs/create-decentralized-identity-documents).
 
 * Setup your dev environment: \
-  `pip install .[dev]`
+  `pip install -e '.[dev]'`
 
 * Run the linter: \
   `tox -e lint`
