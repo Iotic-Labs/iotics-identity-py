@@ -1,9 +1,8 @@
 # iotics-identity-py
 
-[![PyPi version](https://pypip.in/v/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity/)
-[![PyPi downloads](https://pypip.in/d/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity/#files)
-[![PyPi wheel](https://pypip.in/wheel/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity/#files)
-[![PyPi license](https://pypip.in/license/iotics-identity/badge.svg)](https://pypi.org/project/iotics-identity)
+[![PyPI version](https://img.shields.io/pypi/v/iotics-identity)](https://pypi.org/project/iotics-identity)
+[![PyPI downloads](https://img.shields.io/pypi/dm/iotics-identity)](https://pypi.org/project/iotics-identity/#files)
+[![License](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)](https://github.com/Iotic-Labs/iotics-identity-py/blob/main/LICENSE)
 [![GitHub Issues](https://img.shields.io/github/issues/Iotic-Labs/iotics-identity-py)](https://github.com/Iotic-Labs/iotics-identity-py/issues)
 [![GitHub Contributors](https://img.shields.io/github/contributors/Iotic-Labs/iotics-identity-py)](https://github.com/Iotic-Labs/iotics-identity-py)
 
