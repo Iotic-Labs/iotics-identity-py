@@ -37,4 +37,5 @@ def make_identifier(public_bytes: bytes) -> str:
     checksum = bytearray.fromhex(cl2.hexdigest())[:4]
 
     return IDENTIFIER_PREFIX + base58.b58encode(bytes([IDENTIFIER_METHOD, IDENTIFIER_VERSION, IDENTIFIER_PAD])
-                                                + pk_digest + checksum).decode('ascii')
+                                                + pk_digest + checksum,
+                                                alphabet=base58.BITCOIN_ALPHABET).decode('ascii')

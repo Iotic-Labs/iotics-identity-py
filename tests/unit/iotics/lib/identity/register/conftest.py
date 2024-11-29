@@ -31,12 +31,12 @@ def valid_public_key_base58():
 
 @pytest.fixture
 def a_controller():
-    return Issuer('did:iotics:iotHjrmKpPGWyEC4FFo4d6oyzVVk6MXEEEEE', '#AController')
+    return Issuer('did:iotics:iotCxqy4BPFVZFJEXGpiTDeDCyDPt8LqLqEf', '#AController')
 
 
 @pytest.fixture
 def b_controller():
-    return Issuer('did:iotics:iotHjrmKpPGWyEC4FFo4d6oyzVVk6MXXXXXX', '#AController')
+    return Issuer('did:iotics:iotCGwYfJoBDd791NaXpRDRN6qW8xUyheFLS', '#AController')
 
 
 @pytest.fixture
@@ -95,13 +95,13 @@ def minimal_doc(doc_did, doc_proof, min_doc_owner_pub_key):
 
 
 @pytest.fixture
-def full_doc(doc_keys, doc_did, doc_proof, doc_controller):
+def full_doc(doc_keys, doc_did, another_doc_did, doc_proof, doc_controller):
     return RegisterDocument(did=doc_did,
                             purpose=DIDType.TWIN,
                             proof=doc_proof,
                             revoked=True,
                             metadata=Metadata.build('a label', 'a comment', 'http://a/url'),
-                            creator='did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MEEEEgY',
+                            creator=another_doc_did,
                             spec_version=SUPPORTED_VERSIONS[0],
                             update_time=get_unix_time_ms(),
                             controller=doc_controller,

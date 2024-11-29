@@ -63,11 +63,11 @@ def test_can_build_a_register_doc_with_controller_and_not_owner_public_key(doc_d
     assert new_doc.controller == controller
 
 
-def test_can_build_a_register_doc_with_full_data(doc_keys, doc_did, doc_proof, doc_controller):
+def test_can_build_a_register_doc_with_full_data(doc_keys, doc_did, another_doc_did, doc_proof, doc_controller):
     now_before_create = get_unix_time_ms()
     metadata = Metadata.build('a label', 'a comment', 'http://a/url')
     spec_version = SUPPORTED_VERSIONS[0]
-    creator = 'did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MEEEEgY'
+    creator = another_doc_did
     new_doc = RegisterDocumentBuilder() \
         .add_public_key(doc_keys['#pub_key1'].name, doc_keys['#pub_key1'].base58, doc_keys['#pub_key1'].revoked) \
         .add_public_key_obj(doc_keys['#pub_key2']) \
@@ -174,14 +174,14 @@ def test_can_build_a_register_doc_from_an_other_doc(minimal_doc, full_doc, is_mi
 
 def test_can_build_a_register_doc_from_an_other_doc_overriding_values(full_doc):
     existing_doc = full_doc
-    new_creator = 'did:iotics:iotEEEEKpPGWyEC4FFo4d6oyzVVk6MEEEEgY'
-    new_controller = Issuer.build('did:iotics:iotEEEEKpPGWyEC4FFo4d6oyzHHHHMEEEEgY', '#NewController')
+    new_creator = 'did:iotics:iotA5H2cacnZyRCcuKd6wxPkbNxhAw7WCL2G'
+    new_controller = Issuer.build('did:iotics:iotB4X2uEA4ZCAHkMjCci8HzD8gU1UoeRH53', '#NewController')
     new_metadata = Metadata(label='a label')
     new_version = SUPPORTED_VERSIONS[0]
     new_pub_key = RegisterPublicKey(name='#new_pub_key1', base58=get_public_base_58_key(), revoked=False)
     new_auth_key = RegisterAuthenticationPublicKey(name='#new_auth_key1', base58=get_public_base_58_key(),
                                                    revoked=False)
-    a_controller = Issuer.from_string('did:iotics:iotHjrmKpPGWyEC4FFo4d6oyzVVk6MXEEEEE#AController')
+    a_controller = Issuer.from_string('did:iotics:iotC3MU9Bhfx6o2CMq8rJb5sbLJTd5HoJmH5#AController')
     new_control_deleg_proof = RegisterDelegationProof(name='#new_deleg_control_key1', controller=a_controller,
                                                       proof='a_deleg_proof_validated_by_the_resolver',
                                                       revoked=False)

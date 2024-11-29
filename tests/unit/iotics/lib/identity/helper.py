@@ -21,7 +21,7 @@ def get_doc_with_keys(public_keys: Iterable[RegisterPublicKey] = None,
     _ = [builder.add_control_delegation_obj(k) for k in (deleg_control or ())]
     _ = [builder.add_authentication_delegation_obj(k) for k in (deleg_auth or ())]
 
-    return builder.build(did=did or 'did:iotics:iotHHHHKpPGWyEC4FFo4d6oyzVVk6MXLmEgY',
+    return builder.build(did=did or 'did:iotics:iotDadb3rSWedk8iqExSbwqLtijG5XQByHC7',
                          purpose=DIDType.TWIN,
                          proof='a proof',
                          revoked=True,
